@@ -1,0 +1,106 @@
+package com.bezkoder.spring.security.postgresql.controllers;
+
+
+import com.bezkoder.spring.security.postgresql.dto.PostDTO;
+import com.bezkoder.spring.security.postgresql.models.Post;
+
+
+import com.bezkoder.spring.security.postgresql.payload.request.PostRequest;
+import com.bezkoder.spring.security.postgresql.services.PostService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/posts")
+@CrossOrigin(origins = "*")
+
+public class PostController {
+
+    @Autowired
+    private PostService postService;
+
+    // Retorna todos os posts
+    @GetMapping("/{weddingDataId}")
+    public ResponseEntity<List<PostDTO>> getAllPosts(@PathVariable Long weddingDataId) {
+        try {
+            List<Post> posts = postService.getAllPosts(weddingDataId);
+            if (posts.isEmpty()) {
+                return ResponseEntity.ok(Collections.emptyList());
+            }
+
+            List<PostDTO> postDTOs = posts.stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(postDTOs);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    private PostDTO convertToDTO(Post post) {
+        return new PostDTO(
+                post.getId(),
+                post.getContent(),
+                post.getMediaUrl(),
+                post.getReactions(),
+                post.getUser()
+        );
+    }
+
+    // Adiciona uma reação a um post
+    @PostMapping("/{postId}/reactions")
+    public ReactionResponse addReaction(@PathVariable Long postId, @RequestParam String reaction) {
+        Integer reactionCount = postService.addReaction(postId, reaction);
+        return new ReactionResponse(reaction, reactionCount);
+    }
+
+    @PostMapping(value = {"/midia" }, consumes = "multipart/form-data")
+    public ResponseEntity<Post> savePostWithMedia(
+            @RequestParam("content") String content,
+            @RequestParam(value = "media", required = false) MultipartFile media) throws IOException {
+        Post post = postService.savePostMidia(content, media);
+        return ResponseEntity.ok(post);
+    }
+
+    // Salva um post diretamente com JSON (application/json)
+    @PostMapping(consumes = "application/json")
+    public ResponseEntity<Post> savePostWithJson(@RequestBody PostRequest postRequest) {
+        Post savedPost = postService.savePost(postRequest);
+        return ResponseEntity.ok(savedPost);
+    }
+
+
+    // Classe de resposta para as reações
+    public static class ReactionResponse {
+        private String reaction;
+        private Integer reactionCount;
+
+        public ReactionResponse(String reaction, Integer reactionCount) {
+            this.reaction = reaction;
+            this.reactionCount = reactionCount;
+        }
+
+        public String getReaction() {
+            return reaction;
+        }
+
+        public void setReaction(String reaction) {
+            this.reaction = reaction;
+        }
+
+        public Integer getReactionCount() {
+            return reactionCount;
+        }
+
+        public void setReactionCount(Integer reactionCount) {
+            this.reactionCount = reactionCount;
+        }
+    }
+}
