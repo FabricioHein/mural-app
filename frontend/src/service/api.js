@@ -53,6 +53,21 @@ class ApiClient {
     }
   }
 
+  async postFormData(data) {
+    try {
+      const response = await this.api.post('/api/posts/midia', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data', 
+        },
+      });
+
+      this.toast.success('Dados enviados com sucesso!');
+      return response.data;
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
   async put(url, data) {
     try {
       const response = await this.api.put(url, data);

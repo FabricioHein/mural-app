@@ -48,7 +48,7 @@ public class PostController {
         return new PostDTO(
                 post.getId(),
                 post.getContent(),
-                post.getMediaUrl(),
+              "http://localhost:3000/uploads/" + post.getMediaUrl(),
                 post.getReactions(),
                 post.getUser()
         );
@@ -56,17 +56,22 @@ public class PostController {
 
     // Adiciona uma reação a um post
     @PostMapping("/{postId}/reactions")
-    public ReactionResponse addReaction(@PathVariable Long postId, @RequestParam String reaction) {
+    public ReactionResponse addReaction(@PathVariable Long postId, @RequestBody String reaction) {
         Integer reactionCount = postService.addReaction(postId, reaction);
         return new ReactionResponse(reaction, reactionCount);
     }
 
-    @PostMapping(value = {"/midia" }, consumes = "multipart/form-data")
-    public ResponseEntity<Post> savePostWithMedia(
+    @PostMapping(value = "/midia", consumes = "multipart/form-data")
+    public ResponseEntity<Post> savePostWithDetails(
+            @RequestParam("mediaType") String mediaType,
+            @RequestParam("userId") Long userId,
+            @RequestParam("weddingDataId") Long weddingDataId,
             @RequestParam("content") String content,
             @RequestParam(value = "media", required = false) MultipartFile media) throws IOException {
-        Post post = postService.savePostMidia(content, media);
-        return ResponseEntity.ok(post);
+
+        // Chama o serviço para salvar o post com os dados fornecidos
+        Post savedPost = postService.savePostMidia(content, media, mediaType, userId, weddingDataId);
+        return ResponseEntity.ok(savedPost);
     }
 
     // Salva um post diretamente com JSON (application/json)

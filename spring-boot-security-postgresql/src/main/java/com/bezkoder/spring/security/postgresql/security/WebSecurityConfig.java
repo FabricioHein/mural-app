@@ -89,6 +89,7 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
         .authorizeHttpRequests(auth -> 
           auth.requestMatchers("/api/auth/**").permitAll()
               .requestMatchers("/api/wedding-data/**").permitAll()
+                  .requestMatchers("/uploads/**").permitAll()
                   .anyRequest().authenticated()
         );
     

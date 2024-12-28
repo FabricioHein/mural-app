@@ -15,6 +15,7 @@
     <!-- Container para botões de ações -->
     <div class="action-buttons">
       <div v-if="!isCaptured" class="controls">
+        <button @click="back()" class="capture-button"> Voltar</button>
         <button @click="startCapture('photo')" class="capture-button">📸 Tirar Foto</button>
         <button @click="startCapture('video')" class="capture-button">🎥 Gravar Vídeo</button>
       </div>
@@ -26,8 +27,9 @@
     </div>
   </div>
 </template>
-
 <script>
+import ApiClient from '@/service/api';
+
 export default {
   name: "CaptureMedia",
   data() {
@@ -40,6 +42,7 @@ export default {
       photo: null, // URL da foto capturada
       videoSrc: null, // URL do vídeo gravado
       mediaStream: null, // Para armazenar o stream da câmera
+      videoBlob: null, // Blob do vídeo gravado
     };
   },
   methods: {
@@ -50,7 +53,9 @@ export default {
         this.capturePhoto();
       }
     },
-
+    back(){
+      this.$router.push('/mural');
+    },
     async capturePhoto() {
       const videoElement = this.$refs.video;
       const canvas = document.createElement("canvas");
@@ -84,6 +89,7 @@ export default {
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunks, { type: "video/webm" });
         this.videoSrc = URL.createObjectURL(blob);
+        this.videoBlob = blob; // Armazena o blob diretamente para envio posterior
         this.stopCamera();
 
         this.isCaptured = true;
@@ -133,50 +139,50 @@ export default {
       this.isVideo = false;
       this.photo = null;
       this.videoSrc = null;
+      this.videoBlob = null; // Limpa o blob armazenado
       this.getMediaStream(); // Reiniciar a câmera
     },
 
     async sendCapture() {
-      if (this.isPhoto) {
+      if (this.isPhoto && this.photo) {
         // Converte a foto capturada (data URL) para Blob
         const blob = this.dataURLToBlob(this.photo);
+        const mimeType = blob.type || 'image/png'; // Detecta o tipo MIME
+        const mediaType = mimeType.split('/')[1]; // Extrai a extensão
+
         const formData = new FormData();
-        formData.append("media", blob, "photo.png");
-        formData.append("content", ""); // Adicione conteúdo, se necessário
+        formData.append("media", blob);
+        formData.append("content", "Teste"); // Adicione conteúdo, se necessário
+        formData.append("userId", 1); // Adicione conteúdo, se necessário
+        formData.append("weddingDataId", 2); // Adicione conteúdo, se necessário
+        formData.append("mediaType", mediaType); // 'png', 'jpeg', etc.
 
         this.sendPost(formData);
-      } else if (this.isVideo) {
-        // Obtém o Blob do vídeo a partir da URL criada
-        const videoBlob = await this.getVideoBlob();
-        if (videoBlob) {
-          const formData = new FormData();
-          formData.append("media", videoBlob, "video.webm");
-          formData.append("content", ""); // Adicione conteúdo, se necessário
+      } else if (this.isVideo && this.videoBlob) {
+        // Envia diretamente o blob armazenado
+        const mimeType = this.videoBlob.type || 'video/webm'; // Detecta o tipo MIME
+        const mediaType = mimeType.split('/')[1]; // Extrai a extensão
 
-          this.sendPost(formData);
-        }
+        const formData = new FormData();
+        formData.append("media", this.videoBlob);
+        formData.append("content", "Teste"); // Adicione conteúdo, se necessário
+        formData.append("userId", 1); // Adicione conteúdo, se necessário
+        formData.append("weddingDataId", 2); // Adicione conteúdo, se necessário
+        formData.append("mediaType", mediaType); // 'webm', 'mp4', etc.
+
+        this.sendPost(formData);
       }
     },
 
     async sendPost(formData) {
       try {
-        const response = await fetch("/api/posts", {
-          method: "POST",
-          body: formData,
-        });
+        const apiClient = new ApiClient();
 
-        if (response.ok) {
-          const data = await response.json();
-          console.log("Post enviado com sucesso:", data);
+        const response = await apiClient.postFormData(formData);
+        this.posts = response;
 
-          // Reseta o estado da captura
-          this.resetCapture();
-        } else {
-          throw new Error("Erro no envio do post");
-        }
       } catch (error) {
-        console.error("Erro ao enviar a captura:", error);
-        alert("Erro ao enviar a captura!");
+        console.error('Erro ao carregar os posts:', error);
       }
     },
 
@@ -191,15 +197,6 @@ export default {
       }
       return new Blob([u8arr], { type: mime });
     },
-
-    getVideoBlob() {
-      return fetch(this.videoSrc)
-        .then((res) => res.blob())
-        .catch((err) => {
-          console.error("Erro ao converter o vídeo:", err);
-          return null;
-        });
-    },
   },
 
   mounted() {
@@ -207,6 +204,8 @@ export default {
   },
 };
 </script>
+
+
 <style scoped>
 .app {
   display: flex;
@@ -214,7 +213,8 @@ export default {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #f9f9f9;  /* Cor suave de fundo para casamento */
+  background-color: #f9f9f9;
+  /* Cor suave de fundo para casamento */
   color: #333;
   position: relative;
   overflow: hidden;
@@ -222,17 +222,20 @@ export default {
 
 video {
   width: 100%;
-  height: 80%; /* Alterado para altura de 80% */
+  height: 80%;
+  /* Alterado para altura de 80% */
   object-fit: cover;
   position: absolute;
   top: 0;
   left: 0;
-  border-radius: 10px; /* Bordas arredondadas */
+  border-radius: 10px;
+  /* Bordas arredondadas */
 }
 
 .countdown {
   font-size: 60px;
-  color: #ff4081; /* Cor suave e chamativa para o contador */
+  color: #ff4081;
+  /* Cor suave e chamativa para o contador */
   position: absolute;
   top: 20px;
   left: 50%;
@@ -251,21 +254,26 @@ video {
 .capture-button {
   padding: 12px 30px;
   font-size: 20px;
-  background-color: #e91e63; /* Cor delicada e elegante para casamento */
+  background-color: #e91e63;
+  /* Cor delicada e elegante para casamento */
   color: white;
   border: none;
-  border-radius: 50px; /* Botões arredondados */
+  border-radius: 50px;
+  /* Botões arredondados */
   cursor: pointer;
   transition: background-color 0.3s, transform 0.3s ease;
 }
 
 .capture-button:hover {
-  background-color: #c2185b; /* Cor mais escura ao passar o mouse */
-  transform: translateY(-5px); /* Efeito de "flutuar" */
+  background-color: #c2185b;
+  /* Cor mais escura ao passar o mouse */
+  transform: translateY(-5px);
+  /* Efeito de "flutuar" */
 }
 
 .capture-button:active {
-  background-color: #880e4f; /* Cor ainda mais escura quando pressionado */
+  background-color: #880e4f;
+  /* Cor ainda mais escura quando pressionado */
   transform: translateY(0);
 }
 
@@ -278,8 +286,10 @@ img {
   max-width: 100%;
   height: auto;
   margin-top: 20px;
-  border-radius: 10px; /* Bordas arredondadas para a imagem */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra suave para destacar */
+  border-radius: 10px;
+  /* Bordas arredondadas para a imagem */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  /* Sombra suave para destacar */
 }
 
 video {
@@ -287,8 +297,10 @@ video {
   margin-top: 20px;
   margin-right: 5px;
   margin-bottom: 5px;
-  border-radius: 10px; /* Bordas arredondadas para o vídeo */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra suave para destacar */
+  border-radius: 10px;
+  /* Bordas arredondadas para o vídeo */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  /* Sombra suave para destacar */
 }
 
 .action-buttons {
