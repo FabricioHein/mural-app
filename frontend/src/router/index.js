@@ -28,7 +28,7 @@ const routes = [
   {
     path: '/auth/noivos/signup',
     name: 'CadastroNoivos',
-    component: () => import('@/components/CadastroNoivos.vue'),
+    component: () => import('@/components/CadastroNoivas.vue'),
     meta: { requiresNoAuth: true },
   },
   {

@@ -3,8 +3,11 @@ package com.bezkoder.spring.security.postgresql.controllers;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.bezkoder.spring.security.postgresql.models.WeddingData;
+import com.bezkoder.spring.security.postgresql.repository.WeddingDataRepository;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +40,10 @@ import com.bezkoder.spring.security.postgresql.security.services.UserDetailsImpl
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+
+  @Autowired
+  private WeddingDataRepository weddingDataRepository;
+
   @Autowired
   AuthenticationManager authenticationManager;
 
@@ -65,8 +72,15 @@ public class AuthController {
     List<String> roles = userDetails.getAuthorities().stream().map(item -> item.getAuthority())
         .collect(Collectors.toList());
 
+    WeddingData wedding = weddingDataRepository.findByUserId(userDetails.getId())
+            .orElseGet(() -> {
+              WeddingData // Caso não exista, cria um novo WeddingData
+                      newWedding = new WeddingData();
+              return newWedding;
+            });
+
     return ResponseEntity
-        .ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
+        .ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles, wedding));
   }
 
   @PostMapping("/signup")

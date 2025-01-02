@@ -6,6 +6,8 @@ import ApiClient from '@/service/api';
 const apiClient = new ApiClient();
 const route = useRoute(); // Hook para acessar a query string
 
+const token = localStorage.getItem('accessToken')
+
 const weddingData = reactive({
   uuid: '',
   brideAndGroomName: '',
@@ -71,7 +73,7 @@ onMounted(() => {
           <div class="navbar-menu">
             <div class="navbar-end">
               <div class="navbar-item">
-                <router-link to="/auth/signin" class="button is-primary is-rounded ">
+                <router-link to="/auth/signin" class="button is-primary is-rounded" v-if="!token">
                   <span class="icon">
                   </span>
                   <i class="fas fa-user"></i>

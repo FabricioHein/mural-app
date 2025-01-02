@@ -211,7 +211,12 @@ export default {
         const apiClient = new ApiClient();
         const response = await apiClient.postFormData('/api/posts/midia', formData);
 
-        this.$router.push('/mural')
+        this.$router.push({
+          name: 'mural',
+          query: {
+            uuid:  this.weddingData.uuid
+          }
+        });
       } catch (error) {
         console.error('Erro ao carregar os posts:', error);
       }

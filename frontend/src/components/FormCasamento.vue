@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" v-if="load">
     <div class="section">
       <div class="box">
         <h1 class="title has-text-centered">Cadastro de Casamento</h1>
@@ -70,9 +70,18 @@
         </div>
 
         <!-- Botão de Envio -->
-        <div class="field is-grouped is-grouped-right">
-          <button class="button is-primary" @click="submitForm">Enviar</button>
+        <div class="field">
+          <div class="field is-grouped is-grouped-right">
+            <div class="control">
+              <button @click="back()" class="button is-alert"> Voltar</button>
+
+            </div>
+            <button class="button is-primary" @click="submitForm">Enviar</button>
+
+
+          </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -82,10 +91,17 @@
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 import ApiClient from '@/service/api';
+import { useToast } from 'vue-toastification';
 
 export default {
   data() {
     return {
+      toast: useToast(),
+      role: null,
+      load: false,
+      weddingData: {
+
+      },
       formData: {
         brideAndGroomName: '',
         weddingDate: '',
@@ -102,6 +118,41 @@ export default {
     };
   },
   methods: {
+    async fetchWeddingData() {
+      const uuid = this.$route.query.uuid;
+      if (uuid == 'noivos' && uuid) {
+        this.load = true;
+        return
+      }
+      if (!uuid) {
+        console.error('UUID não encontrado na query string.');
+        return;
+      }
+
+      if (uuid != 'noivos' && uuid) {
+        try {
+          const apiClient = new ApiClient();
+
+          const response = await apiClient.get(`/api/wedding-data/uuid/${uuid}`);
+
+          Object.assign(this.weddingData, response);
+          this.load = true;
+
+        } catch (error) {
+          console.error('Erro ao buscar dados do casamento:', error);
+        }
+      }
+
+    },
+
+    back() {
+      this.$router.push({
+        name: 'Menu',
+        query: {
+          uuid: this.weddingData.uuid
+        }
+      });
+    },
     handleImageUpload(event) {
       const file = event.target.files[0];
       if (file) {
@@ -147,10 +198,40 @@ export default {
     },
     validateForm() {
       this.errors = {};
-      if (!this.formData.brideAndGroomName) this.errors.brideAndGroomName = 'O nome dos noivos é obrigatório.';
-      if (!this.formData.weddingDate) this.errors.weddingDate = 'A data do casamento é obrigatória.';
-      if (!this.formData.color) this.errors.color = 'A cor do tema é obrigatória.';
-      if (!this.imagePreview) this.errors.image = 'A imagem de perfil é obrigatória.';
+
+      if (!this.formData.brideAndGroomName) {
+        this.errors.brideAndGroomName = 'O nome dos noivos é obrigatório.';
+      }
+      if (!this.formData.weddingDate) {
+        this.errors.weddingDate = 'A data do casamento é obrigatória.';
+      }
+      if (!this.formData.color) {
+        this.errors.color = 'A cor do tema é obrigatória.';
+      }
+      if (!this.imagePreview) {
+        this.errors.image = 'A imagem de perfil é obrigatória.';
+      }
+
+      // Validação adicional para o tamanho do blob
+      const imageToSend = this.croppedBlob || this.formData.imageFile;
+      if (imageToSend) {
+        const maxSize = 20 * 1024 * 1024; // 20 MB para imagens
+        if (imageToSend.size > maxSize && this.formData.mediaType !== 'video') {
+          this.errors.image = 'A imagem excede o tamanho máximo permitido de 20 MB.';
+          return
+        }
+
+        if (this.formData.mediaType === 'video') {
+          const maxVideoSize = 50 * 1024 * 1024; // 50 MB para vídeos
+          if (imageToSend.size > maxVideoSize) {
+
+            this.errors.image = 'O vídeo excede o tamanho máximo permitido de 50 MB.';
+            this.toast.error(this.errors.image);
+
+          }
+        }
+      }
+
       return Object.keys(this.errors).length === 0;
     },
     async submitForm() {
@@ -171,14 +252,22 @@ export default {
       try {
         const apiClient = new ApiClient();
 
-        await apiClient.postFormData('/api/casamento', formData);
-        this.$router.push('/menu');
+        const response = await apiClient.postFormData('/api/casamento', formData);
 
-
+        this.$router.push({
+          name: 'Menu',
+          query: {
+            uuid: response.uuid
+          }
+        });
       } catch (error) {
         console.error('Erro ao enviar o formulário:', error);
       }
-    },
+    }
+  },
+  async mounted() {
+    await this.fetchWeddingData();
+    this.role = localStorage.getItem('roles')
   },
   destroyed() {
     if (this.cropper) {

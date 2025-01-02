@@ -43,10 +43,10 @@ class ApiClient {
     }
   }
 
-  async post(url, data) {
+  async post(url, data, msg) {
     try {
       const response = await this.api.post(url, data);
-      this.toast.success('Dados enviados com sucesso!');
+      this.toast.success(msg || 'Dados enviados com sucesso!')
       return response.data;
     } catch (error) {
       this.handleError(error);
@@ -132,7 +132,7 @@ class ApiClient {
       if (error.response.status === 401) {
         //Remove o token e atualiza a página
          localStorage.removeItem('accessToken');
-         this.toast.error('Sessão expirada. Faça login novamente.');
+         this.toast.error('Error no Acesso, tente novoamente');
          window.location.reload(); // Atualiza a página
         return; // Evita lançar o erro novamente após o tratamento
       }

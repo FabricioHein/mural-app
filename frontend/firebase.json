@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "linkkoub",
+    "site": "muradodosnoivos",
     "public": "/dist",
     "ignore": [
       "firebase.json",

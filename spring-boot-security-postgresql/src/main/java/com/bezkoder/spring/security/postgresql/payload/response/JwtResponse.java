@@ -1,5 +1,7 @@
 package com.bezkoder.spring.security.postgresql.payload.response;
 
+import com.bezkoder.spring.security.postgresql.models.WeddingData;
+
 import java.util.List;
 
 public class JwtResponse {
@@ -9,13 +11,15 @@ public class JwtResponse {
   private String username;
   private String email;
   private final List<String> roles;
+  private WeddingData weddingData;
 
-  public JwtResponse(String accessToken, Long id, String username, String email, List<String> roles) {
+  public JwtResponse(String accessToken, Long id, String username, String email, List<String> roles, WeddingData WeddingData) {
     this.token = accessToken;
     this.id = id;
     this.username = username;
     this.email = email;
     this.roles = roles;
+    this.weddingData = WeddingData;
   }
 
   public String getAccessToken() {
@@ -61,4 +65,12 @@ public class JwtResponse {
   public List<String> getRoles() {
     return roles;
   }
+
+  public WeddingData getWeddingData() {
+        return weddingData;
+    }
+
+  public void setWeddingData(WeddingData weddingData) {
+        this.weddingData = weddingData;
+    }
 }

@@ -54,7 +54,19 @@ export default {
   methods: {
     async fetchWeddingData() {
       const uuid = this.$route.query.uuid;
-      try {
+
+      if (uuid == 'noivos' && uuid) {
+        this.load = true;
+        return
+      }
+
+      if (!uuid) {
+        console.error('UUID não encontrado na query string.');
+        return;
+      }
+
+      if (uuid != 'noivos' && uuid) {
+        try {
           const apiClient = new ApiClient();
 
           const response = await apiClient.get(`/api/wedding-data/uuid/${uuid}`);
@@ -65,6 +77,7 @@ export default {
         } catch (error) {
           console.error('Erro ao buscar dados do casamento:', error);
         }
+      }
 
     },
     async handleSubmit() {
@@ -83,12 +96,37 @@ export default {
         localStorage.setItem('roles', response.roles[0]);
 
         // Redirecionar para a página inicial ou página protegida
-        this.$router.push({
-          name: 'Menu',
-          query: {
-            uuid: this.weddingData.uuid !=  'novios' ? this.weddingData.uuid  : 'noivos' 
-          }
-        }); // ou outra rota que você queira
+        if (response.roles[0] == 'ROLE_USER' && response.weddingData.uuid != 'novios') {
+          this.$router.push({
+            name: 'Menu',
+            query: {
+              uuid: this.weddingData.uuid
+            }
+          });
+          return
+        }
+
+        if (response.roles[0] == 'ROLE_MODERATOR' && response.weddingData.uuid) {
+          this.$router.push({
+            name: 'Menu',
+            query: {
+              uuid: response.weddingData.uuid
+            }
+          });
+          return
+
+
+        }else{
+          this.$router.push({
+            name: 'dados-casamento',
+            query: {
+              uuid: 'noivos'
+            }
+          });
+          return
+
+        }
+
       } catch (error) {
         console.error('Erro ao realizar login:', error);
 
