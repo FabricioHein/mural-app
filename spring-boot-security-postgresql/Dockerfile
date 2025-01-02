@@ -1,14 +1,15 @@
-FROM maven:3.9-amazoncorretto-17 AS build
+# Build stage
+FROM maven:3.9-eclipse-temurin-21 AS build
 
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 
-# Adiciona flag --fail-at-end para ver todos os erros
-# E -e para mostrar os logs de erro completos
-RUN mvn clean package --fail-at-end -e -X
+# Build the application
+RUN mvn clean package -DskipTests
 
-FROM openjdk:17-jdk-slim
+# Runtime stage
+FROM eclipse-temurin:21-jre-jammy
 
 WORKDIR /app
 EXPOSE 8080
