@@ -4,13 +4,18 @@ WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 
-RUN mvn clean package -DskipTests
+# Adiciona mais verbosidade ao build do Maven
+RUN mvn clean package -X
+
+# Lista os arquivos gerados para debug
+RUN ls -la target/
 
 FROM openjdk:17-jdk-slim
 
 WORKDIR /app
 EXPOSE 8080
 
-COPY --from=build /app/target/deploy_render-1.0.0.jar app.jar
+# Ajuste o nome do arquivo JAR conforme necessário
+COPY --from=build /app/target/*.jar app.jar
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
