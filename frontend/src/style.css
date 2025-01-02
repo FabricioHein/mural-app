@@ -8,6 +8,8 @@
     --branco-quente: #fff4f1;
     --cinza-claro: #f5f5f5;
     --preto-suave: #4a4a4a;
+    --vermelho-return: #e24949a3;
+
   }
   
   /* Adicionando um estilo de borda suave e arredondada */
@@ -43,6 +45,12 @@
   .button.is-primary:hover {
     background-color: var(--rosa-escuro);
     color: white;
+  }
+  .button.is-alert {
+    background-color: var(--vermelho-return);
+    color: white;
+    border-radius: 8px;
+    border: none;
   }
   
   /* Cor dos rótulos */

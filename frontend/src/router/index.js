@@ -4,39 +4,50 @@ const routes = [
   {
     path: '/gravarVideo',
     name: 'CaptureMedia',
-    component: () => import(/* webpackChunkName: "index2" */ '@/views/CaptureMedia.vue'),
-    meta: { requiresAuth: true },  // Protege a rota
+    component: () => import('@/components/CaptureMedia.vue'),
+    meta: { requiresAuth: true }, // Protege a rota
   },
   {
-    path: '/auth/noiva/signup',
-    name: 'CadastroNoiva',
-    component: () => import(/* webpackChunkName: "index2" */ '@/components/CadastroNoiva.vue'),
-    meta: { requiresNoAuth: true } // Adiciona meta para bloquear caso esteja logado
+    path: '/dados-casamento',
+    name: 'dados-casamento',
+    component: () => import('@/components/FormCasamento.vue'),
+    meta: { requiresAuth: true }, // Protege a rota
   },
   {
     path: '/auth/signin',
     name: 'Login',
-    component: () => import(/* webpackChunkName: "index2" */ '@/components/Login.vue'),
-    meta: { requiresNoAuth: true } // Adiciona meta para bloquear caso esteja logado
+    component: () => import('@/components/Login.vue'),
+    meta: { requiresNoAuth: true },
   },
   {
-    path: '/auth/convidado/signup',
-    name: 'CadastroConvidado',
-    component: () => import(/* webpackChunkName: "index2" */ '@/components/CadastroConvidado.vue'),
-    meta: { requiresNoAuth: true } // Adiciona meta para bloquear caso esteja logado
+    path: '/auth/signup',
+    name: 'Cadastro',
+    component: () => import('@/components/CadastroConvidado.vue'),
+    meta: { requiresNoAuth: true },
+  },
+  {
+    path: '/auth/noivos/signup',
+    name: 'CadastroNoivos',
+    component: () => import('@/components/CadastroNoivos.vue'),
+    meta: { requiresNoAuth: true },
+  },
+  {
+    path: '/menu',
+    name: 'Menu',
+    component: () => import('@/views/Menu.vue'),
+    meta: { requiresAuth: true }, // Protege a rota
   },
   {
     path: '/mural',
-    name: 'Mural',
-    component: () => import(/* webpackChunkName: "index2" */ '@/views/Mural.vue'),
-    meta: { requiresAuth: true },  // Protege a rota
+    name: 'mural',
+    component: () => import('@/components/Mural.vue'),
+    meta: { requiresAuth: true }, // Protege a rota
   },
   {
     path: '/casamento',
     name: 'casamento',
-    component: () => import(/* webpackChunkName: "index2" */ '@/views/Casamento.vue'),
-    meta: { requiresNoAuth: true } // Adiciona meta para bloquear caso esteja logado
-
+    component: () => import('@/views/Casamento.vue'),
+    meta: { requiresNoAuth: false }, // Protege se já estiver logado
   },
 ];
 
@@ -49,13 +60,23 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('accessToken'); // Obtém o token do localStorage
 
+  // Captura o UUID da query string
+  const uuid = to.query.uuid;
+  console.log('UUID capturado:', uuid);
+
   // Verifica se a rota requer autenticação e se o usuário não está logado
   if (to.meta.requiresAuth && !token) {
-    next('/auth/signin'); // Redireciona para a página de login se não houver token
+    next({
+      path: '/auth/signup',
+      query: { uuid }, // Repassa o UUID ou outro parâmetro se necessário
+    });
   }
   // Verifica se a rota exige que o usuário não esteja logado (para impedir o acesso a cadastros)
   else if (to.meta.requiresNoAuth && token) {
-    next('/mural'); // Redireciona para a página inicial ou outra página pública se já estiver logado
+    next({
+      path: '/menu',
+      query: { uuid }, // Repassa o UUID ou outro parâmetro ao redirecionar para o menu
+    });
   } else {
     next(); // Caso contrário, permite o acesso
   }

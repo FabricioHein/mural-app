@@ -19,12 +19,8 @@ public class WeddingData {
 
     private String brideAndGroomName;
     private String imageUrl;
-    private String leaveMessageUrl;
-    private String viewMuralUrl;
-    private String loginUrl;
     private LocalDate weddingDate;
     private String color;
-
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
@@ -33,13 +29,10 @@ public class WeddingData {
     public WeddingData() {
     }
 
-    public WeddingData(UUID uuid, String brideAndGroomName, String imageUrl, String leaveMessageUrl, String viewMuralUrl, String loginUrl, LocalDate weddingDate, User user) {
+    public WeddingData(UUID uuid, String brideAndGroomName, String imageUrl, LocalDate weddingDate, User user) {
         this.uuid = uuid;
         this.brideAndGroomName = brideAndGroomName;
         this.imageUrl = imageUrl;
-        this.leaveMessageUrl = leaveMessageUrl;
-        this.viewMuralUrl = viewMuralUrl;
-        this.loginUrl = loginUrl;
         this.weddingDate = weddingDate;
         this.user = user;
     }
@@ -78,31 +71,7 @@ public class WeddingData {
         this.imageUrl = imageUrl;
     }
 
-    public String getLeaveMessageUrl() {
-        return leaveMessageUrl;
-    }
-
-    public void setLeaveMessageUrl(String leaveMessageUrl) {
-        this.leaveMessageUrl = leaveMessageUrl;
-    }
-
-    public String getViewMuralUrl() {
-        return viewMuralUrl;
-    }
-
-    public void setViewMuralUrl(String viewMuralUrl) {
-        this.viewMuralUrl = viewMuralUrl;
-    }
-
-    public String getLoginUrl() {
-        return loginUrl;
-    }
-
-    public void setLoginUrl(String loginUrl) {
-        this.loginUrl = loginUrl;
-    }
-
-    public LocalDate getWeddingDate() {
+        public LocalDate getWeddingDate() {
         return weddingDate;
     }
 

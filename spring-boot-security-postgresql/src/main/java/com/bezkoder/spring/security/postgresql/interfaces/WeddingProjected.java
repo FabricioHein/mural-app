@@ -9,7 +9,7 @@ public interface WeddingProjected {
     String getBrideAndGroomName();
     String getColor();
     String getImageUrl();
-    String getLeaveMessageUrl();
-    String getViewMuralUrl();
     LocalDate getWeddingDate();
+
+    void setImageUrl(String s);
 }

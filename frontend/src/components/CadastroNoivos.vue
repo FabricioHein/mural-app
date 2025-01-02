@@ -1,10 +1,10 @@
 <template>
   <div class="container" v-if="load">
-    <h2 class="title has-text-centered">Cadastro Convidado</h2>
+    <h2 class="title has-text-centered">Cadastro Noivos</h2>
 
     <!-- Link para quem já tem cadastro -->
     <div class="has-text-centered">
-      <p>Já tem cadastro? <router-link :to="{ name: 'Login', query: { uuid: weddingData.uuid } }"
+      <p>Já tem cadastro? <router-link :to="{ name: 'Login', query: { uuid: 'noivos' } }"
           class="has-text-link">Faça login</router-link></p>
     </div>
 
@@ -35,8 +35,8 @@
           <label class="label">Tipo de Cadastro</label>
           <div class="control">
             <label class="radio">
-              <input type="radio" v-model="formData.role[0]" value="ROLE_USER">
-              Convidado
+              <input type="radio" v-model="formData.role[0]" value="mod">
+              Noivos
             </label>           
           </div>
         </div>
@@ -67,7 +67,7 @@ export default {
         username: '',
         email: '',
         password: '',
-        role: ['ROLE_USER'],
+        role: ['mod'],
       },
       load: false,
       weddingData: {
@@ -83,12 +83,19 @@ export default {
   methods: {
     async fetchWeddingData() {
       const uuid = this.$route.query.uuid;
+      
+      if (uuid != 'noivos' && uuid) {
+        this.load = true;
+        return
+      }
+
       if (!uuid) {
         console.error('UUID não encontrado na query string.');
         return;
       }
-
-      try {
+       
+      if (uuid != 'noivos' && uuid) {
+        try {
           const apiClient = new ApiClient();
 
           const response = await apiClient.get(`/api/wedding-data/uuid/${uuid}`);
@@ -99,6 +106,7 @@ export default {
         } catch (error) {
           console.error('Erro ao buscar dados do casamento:', error);
         }
+      } 
 
     },
     async handleSubmit() {
@@ -124,7 +132,7 @@ export default {
         username: '',
         email: '',
         password: '',
-        role: ['ROLE_USER'],
+        role: ['mod'],
       };
     },
   },

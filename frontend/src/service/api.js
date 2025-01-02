@@ -53,9 +53,23 @@ class ApiClient {
     }
   }
 
-  async postFormData(data) {
+  async postFormData(url, data) {
     try {
-      const response = await this.api.post('/api/posts/midia', data, {
+      const response = await this.api.post(url, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data', 
+        },
+      });
+
+      this.toast.success('Dados enviados com sucesso!');
+      return response.data;
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+  async putFormData(url, data) {
+    try {
+      const response = await this.api.put(url, data, {
         headers: {
           'Content-Type': 'multipart/form-data', 
         },
@@ -116,10 +130,10 @@ class ApiClient {
       console.error('Response headers:', error.response.headers);
   
       if (error.response.status === 401) {
-        // Remove o token e atualiza a página
-        // localStorage.removeItem('accessToken');
-        // this.toast.error('Sessão expirada. Faça login novamente.');
-        // window.location.reload(); // Atualiza a página
+        //Remove o token e atualiza a página
+         localStorage.removeItem('accessToken');
+         this.toast.error('Sessão expirada. Faça login novamente.');
+         window.location.reload(); // Atualiza a página
         return; // Evita lançar o erro novamente após o tratamento
       }
   

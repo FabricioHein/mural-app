@@ -1,5 +1,5 @@
 <template>
-  <div class="app">
+  <div class="app" v-if="load">
     <!-- Vídeo em tela cheia com altura de 80% -->
     <video ref="video" autoplay></video>
 
@@ -15,14 +15,15 @@
     <!-- Container para botões de ações -->
     <div class="action-buttons">
       <div v-if="!isCaptured" class="controls">
-        <button @click="back()" class="capture-button"> Voltar</button>
+        <button @click="back()" class="capture-button-alert"> Voltar</button>
         <button @click="startCapture('photo')" class="capture-button">📸 Tirar Foto</button>
         <button @click="startCapture('video')" class="capture-button">🎥 Gravar Vídeo</button>
       </div>
 
       <div v-if="isCaptured" class="controls">
-        <button @click="resetCapture" class="capture-button">Tentar Novamente</button>
-        <button @click="sendCapture" class="capture-button">Enviar</button>
+        <button @click="back()" class="capture-button-alert"> Voltar</button>
+        <button @click="resetCapture" class="capture-button">📸 Tentar Novamente</button>
+        <button @click="sendCapture" class="capture-button">🎥 Enviar</button>
       </div>
     </div>
   </div>
@@ -34,6 +35,11 @@ export default {
   name: "CaptureMedia",
   data() {
     return {
+      load: false,
+      weddingData: {
+        uuid: null,
+        id: null
+      },
       countdown: 5, // Contagem regressiva para vídeo
       isRecording: false, // Estado da gravação
       isCaptured: false, // Se a captura foi realizada
@@ -53,8 +59,33 @@ export default {
         this.capturePhoto();
       }
     },
-    back(){
-      this.$router.push('/mural');
+    back() {
+      this.$router.push({
+        name: 'Menu',
+        query: {
+          uuid: this.weddingData.uuid
+        }
+      });
+    },
+    async fetchWeddingData() {
+      const uuid = this.$route.query.uuid;
+      if (!uuid) {
+        console.error('UUID não encontrado na query string.');
+        return;
+      }
+
+      try {
+          const apiClient = new ApiClient();
+
+          const response = await apiClient.get(`/api/wedding-data/uuid/${uuid}`);
+
+          Object.assign(this.weddingData, response);
+          this.load = true;
+
+        } catch (error) {
+          console.error('Erro ao buscar dados do casamento:', error);
+        }
+
     },
     async capturePhoto() {
       const videoElement = this.$refs.video;
@@ -76,7 +107,7 @@ export default {
 
     captureVideo() {
       const videoElement = this.$refs.video;
-      const mediaRecorder = new MediaRecorder(videoElement.srcObject);
+      const mediaRecorder = new MediaRecorder(this.mediaStream); // Inclui áudio e vídeo
       let chunks = [];
       let timeLeft = this.countdown;
 
@@ -114,6 +145,7 @@ export default {
       }, 5000); // Captura por 5 segundos
     },
 
+
     stopCamera() {
       if (this.mediaStream) {
         const tracks = this.mediaStream.getTracks();
@@ -126,6 +158,7 @@ export default {
       try {
         this.mediaStream = await navigator.mediaDevices.getUserMedia({
           video: true,
+          audio: true, // Capturar também o áudio
         });
         this.$refs.video.srcObject = this.mediaStream;
       } catch (error) {
@@ -152,11 +185,10 @@ export default {
 
         const formData = new FormData();
         formData.append("media", blob);
-        formData.append("content", "Teste"); // Adicione conteúdo, se necessário
-        formData.append("userId", 1); // Adicione conteúdo, se necessário
-        formData.append("weddingDataId", 2); // Adicione conteúdo, se necessário
-        formData.append("mediaType", mediaType); // 'png', 'jpeg', etc.
-
+        formData.append("content", ""); // Adicione conteúdo, se necessário
+        formData.append("userId", localStorage.getItem('userId')); // Adicione conteúdo, se necessário
+        formData.append("weddingDataId", this.weddingData.id); // Adicione conteúdo, se necessário
+        formData.append("mediaType", mediaType); // 'webm', 'mp4', etc.
         this.sendPost(formData);
       } else if (this.isVideo && this.videoBlob) {
         // Envia diretamente o blob armazenado
@@ -165,9 +197,9 @@ export default {
 
         const formData = new FormData();
         formData.append("media", this.videoBlob);
-        formData.append("content", "Teste"); // Adicione conteúdo, se necessário
-        formData.append("userId", 1); // Adicione conteúdo, se necessário
-        formData.append("weddingDataId", 2); // Adicione conteúdo, se necessário
+        formData.append("content", ""); // Adicione conteúdo, se necessário
+        formData.append("userId", localStorage.getItem('userId')); // Adicione conteúdo, se necessário
+        formData.append("weddingDataId", this.weddingData.id); // Adicione conteúdo, se necessário
         formData.append("mediaType", mediaType); // 'webm', 'mp4', etc.
 
         this.sendPost(formData);
@@ -177,10 +209,9 @@ export default {
     async sendPost(formData) {
       try {
         const apiClient = new ApiClient();
+        const response = await apiClient.postFormData('/api/posts/midia', formData);
 
-        const response = await apiClient.postFormData(formData);
-        this.posts = response;
-
+        this.$router.push('/mural')
       } catch (error) {
         console.error('Erro ao carregar os posts:', error);
       }
@@ -198,9 +229,10 @@ export default {
       return new Blob([u8arr], { type: mime });
     },
   },
-
-  mounted() {
+  async mounted() {
+    await this.fetchWeddingData();
     this.getMediaStream();
+
   },
 };
 </script>
@@ -234,7 +266,7 @@ video {
 
 .countdown {
   font-size: 60px;
-  color: #ff4081;
+  color: #c991a4;
   /* Cor suave e chamativa para o contador */
   position: absolute;
   top: 20px;
@@ -254,7 +286,19 @@ video {
 .capture-button {
   padding: 12px 30px;
   font-size: 20px;
-  background-color: #e91e63;
+  background-color: #c991a4;
+  /* Cor delicada e elegante para casamento */
+  color: white;
+  border: none;
+  border-radius: 50px;
+  /* Botões arredondados */
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s ease;
+}
+.capture-button-alert {
+  padding: 12px 30px;
+  font-size: 20px;
+  background-color: #e24949a3;
   /* Cor delicada e elegante para casamento */
   color: white;
   border: none;
@@ -265,14 +309,14 @@ video {
 }
 
 .capture-button:hover {
-  background-color: #c2185b;
+  background-color: #c991a4;
   /* Cor mais escura ao passar o mouse */
   transform: translateY(-5px);
   /* Efeito de "flutuar" */
 }
 
 .capture-button:active {
-  background-color: #880e4f;
+  background-color: #c991a4;
   /* Cor ainda mais escura quando pressionado */
   transform: translateY(0);
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" v-if="load">
     <h2 class="title has-text-centered">Login</h2>
     <form @submit.prevent="handleSubmit" class="box">
       <div class="field">
@@ -40,10 +40,33 @@ export default {
         password: '',
       },
       passwordError: false,
-      showPassword: false, // Controle para mostrar/ocultar senha
+      showPassword: false,
+      load: false,
+      weddingData: {
+        uuid: null,
+        id: null
+      }
     };
   },
+  async mounted() {
+    await this.fetchWeddingData();
+  },
   methods: {
+    async fetchWeddingData() {
+      const uuid = this.$route.query.uuid;
+      try {
+          const apiClient = new ApiClient();
+
+          const response = await apiClient.get(`/api/wedding-data/uuid/${uuid}`);
+
+          Object.assign(this.weddingData, response);
+          this.load = true;
+
+        } catch (error) {
+          console.error('Erro ao buscar dados do casamento:', error);
+        }
+
+    },
     async handleSubmit() {
 
 
@@ -60,7 +83,12 @@ export default {
         localStorage.setItem('roles', response.roles[0]);
 
         // Redirecionar para a página inicial ou página protegida
-        this.$router.push({ name: 'Mural' }); // ou outra rota que você queira
+        this.$router.push({
+          name: 'Menu',
+          query: {
+            uuid: this.weddingData.uuid !=  'novios' ? this.weddingData.uuid  : 'noivos' 
+          }
+        }); // ou outra rota que você queira
       } catch (error) {
         console.error('Erro ao realizar login:', error);
 
