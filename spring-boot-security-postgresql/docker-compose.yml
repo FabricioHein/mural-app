@@ -1,0 +1,10 @@
+version: "3.8"
+services:
+  spring-boot-app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - SERVER_PORT=3000
+    container_name: spring-boot-app
+    restart: always  # Reinicia o contêiner automaticamente em caso de falha
