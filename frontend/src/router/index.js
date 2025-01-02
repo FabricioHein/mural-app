@@ -2,6 +2,12 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 const routes = [
   {
+    path: '/',
+    name: 'Home',
+    component: () => import('@/views/Home.vue'),
+    meta: { requiresAuth: false }, // Protege a rota
+  },
+  {
     path: '/gravarVideo',
     name: 'CaptureMedia',
     component: () => import('@/components/CaptureMedia.vue'),
