@@ -1,19 +1,16 @@
-# Build stage
-FROM maven:3.9-eclipse-temurin-21 AS build
+FROM ubuntu:latest AS build
 
-WORKDIR /app
-COPY pom.xml .
-COPY src ./src
+RUN apt-get update
+RUN apt-get install openjdk-17-jdk -y
+COPY . .
 
-# Build the application
-RUN mvn clean package -DskipTests
+RUN apt-get install maven -y
+RUN mvn clean install 
 
-# Runtime stage
-FROM eclipse-temurin:21-jre-jammy
+FROM openjdk:21-jdk-slim
 
-WORKDIR /app
 EXPOSE 8080
 
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /target/*.jar app.jar
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT [ "java", "-jar", "app.jar" ]
