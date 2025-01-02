@@ -1,16 +1,16 @@
-FROM ubuntu:latest AS build
+FROM maven:3.9-amazoncorretto-17 AS build
 
-RUN apt-get update
-RUN apt-get install openjdk-17-jdk -y
-COPY . .
+WORKDIR /app
+COPY pom.xml .
+COPY src ./src
 
-RUN apt-get install maven -y
-RUN mvn clean install 
+RUN mvn clean package -DskipTests
 
 FROM openjdk:17-jdk-slim
 
+WORKDIR /app
 EXPOSE 8080
 
-COPY --from=build /target/deploy_render-1.0.0.jar app.jar
+COPY --from=build /app/target/deploy_render-1.0.0.jar app.jar
 
-ENTRYPOINT [ "java", "-jar", "app.jar" ]
+ENTRYPOINT ["java", "-jar", "app.jar"]
