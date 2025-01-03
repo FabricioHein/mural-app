@@ -81,7 +81,7 @@
                 <div class="columns">
                     <div class="column is-4">
                         <div class="testimonial-card">
-                            <img src="/api/placeholder/80/80" alt="Couple" class="testimonial-image">
+                            <img src="/assets/profile-9.jpeg" alt="Couple" class="testimonial-image">
                             <p class="has-text-centered mb-4">"O mural tornou nossa festa ainda mais especial. Ver as
                                 fotos aparecendo em tempo real foi mágico!"</p>
                             <p class="has-text-centered has-text-weight-bold">Maria & João</p>
@@ -90,7 +90,7 @@
                     </div>
                     <div class="column is-4">
                         <div class="testimonial-card">
-                            <img src="/api/placeholder/80/80" alt="Couple" class="testimonial-image">
+                            <img src="/assets/profile-31.jpeg" alt="Couple" class="testimonial-image">
                             <p class="has-text-centered mb-4">"Nossos convidados adoraram participar! As mensagens nos
                                 emocionaram muito."</p>
                             <p class="has-text-centered has-text-weight-bold">Ana & Pedro</p>
@@ -99,7 +99,7 @@
                     </div>
                     <div class="column is-4">
                         <div class="testimonial-card">
-                            <img src="/api/placeholder/80/80" alt="Couple" class="testimonial-image">
+                            <img src="/assets/profile-33.jpeg" alt="Couple" class="testimonial-image">
                             <p class="has-text-centered mb-4">"Vale cada centavo! As lembranças que criamos são
                                 verdadeiramente únicas."</p>
                             <p class="has-text-centered has-text-weight-bold">Carla & Lucas</p>
@@ -150,14 +150,15 @@ export default {
 
 <style>
 :root {
-    --primary-color: #2c5282;
+    --primary-color: #c991a4;
     /* Rich navy blue */
-    --secondary-color: #f7fafc;
-    --accent-color: #c5a572;
+    --secondary-color: #ffffff;
+    --accent-color: #d69d8b;
     /* Warm gold */
-    --text-color: #2d3748;
-    --gradient-start: #8f456a;
-    --gradient-end: #1a365d;
+    --text-color: #4a4a4a;
+    --gradient-start: #d73d5d;
+    --gradient-end: #e0a6b2;
+
 }
 
 body {
@@ -179,7 +180,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: url('https://picsum.photos/1920/1080') center/cover;
+    background: url('https://img.cancaonova.com/cnimages/canais/uploads/sites/6/2017/01/formacao_1600x1200-o-que-os-noivos-precisam-saber-antes-de-se-casarem-768x576.jpg') center/cover;
 
     opacity: 0.1;
     mix-blend-mode: overlay;

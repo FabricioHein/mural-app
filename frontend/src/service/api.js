@@ -57,7 +57,7 @@ class ApiClient {
     try {
       const response = await this.api.post(url, data, {
         headers: {
-          'Content-Type': 'multipart/form-data', 
+          'Content-Type': 'multipart/form-data',
         },
       });
 
@@ -71,7 +71,7 @@ class ApiClient {
     try {
       const response = await this.api.put(url, data, {
         headers: {
-          'Content-Type': 'multipart/form-data', 
+          'Content-Type': 'multipart/form-data',
         },
       });
 
@@ -123,36 +123,33 @@ class ApiClient {
   // Método para tratar erros
   handleError(error) {
     console.error('API Error:', error);
+
     if (error.response) {
-      // Resposta de erro da API
       console.error('Response data:', error.response.data);
-      console.error('Response status:', error.response.status);
-      console.error('Response headers:', error.response.headers);
-  
-      if (error.response.status === 401) {
-        //Remove o token e atualiza a página
-         localStorage.removeItem('accessToken');
-         this.toast.error('Error no Acesso, tente novoamente');
-         window.location.reload(); // Atualiza a página
+
+      if (error.response.data.message) {
+        this.toast.error(error.response.data.message);
+      } else {
+        this.toast.error(`Erro ${error.response.status}: Ocorreu um erro inesperado.`);
+      }
+
+      if (error.response.status === 401 && !error.response.data.message) {
+        localStorage.removeItem('accessToken');
+        this.toast.error('Error no acesso, tente novamente.');
+       // window.location.reload();
         return; // Evita lançar o erro novamente após o tratamento
       }
-  
-      if (error.message) {
-        this.toast.error(error.message);
-      } else {
-        this.toast.error(`Erro ${error.response.status}: ${error.response || 'Ocorreu um erro.'}`);
-      }
     } else if (error.request) {
-      // Nenhuma resposta recebida
       console.error('Request data:', error.request);
       this.toast.error('Nenhuma resposta recebida do servidor.');
     } else {
-      // Erro ao configurar a requisição
       console.error('Error message:', error.message);
       this.toast.error(`Erro: ${error.message}`);
     }
+
     throw error;
   }
+
 }
 
 export default ApiClient;

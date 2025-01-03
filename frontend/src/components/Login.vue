@@ -3,10 +3,10 @@
     <h2 class="title has-text-centered">Login</h2>
     <form @submit.prevent="handleSubmit" class="box">
       <div class="field">
-        <label class="label" for="username">Username</label>
+        <label class="label" for="email">Email</label>
         <div class="control">
-          <input class="input" type="text" id="username" v-model="formData.username" required
-            placeholder="Digite o seu username" />
+          <input class="input" type="text" id="email" v-model="formData.email" required
+            placeholder="Digite o seu email" />
         </div>
       </div>
 
@@ -36,7 +36,7 @@ export default {
   data() {
     return {
       formData: {
-        username: '',
+        email: '',
         password: '',
       },
       passwordError: false,
@@ -91,12 +91,12 @@ export default {
 
         // Armazenar o accessToken no localStorage
         localStorage.setItem('accessToken', response.accessToken);
-        localStorage.setItem('username', response.username);
+        localStorage.setItem('email', response.email);
         localStorage.setItem('userId', response.id);
         localStorage.setItem('roles', response.roles[0]);
 
         // Redirecionar para a página inicial ou página protegida
-        if (response.roles[0] == 'ROLE_USER' && response.weddingData.uuid != 'novios') {
+        if (response.roles[0] == 'ROLE_USER' && response.weddingData.uuid != 'novios' && this.weddingData.uuid) {
           this.$router.push({
             name: 'Menu',
             query: {
@@ -132,7 +132,7 @@ export default {
 
         // Se ocorrer erro, limpar os dados do localStorage
         localStorage.removeItem('accessToken');
-        localStorage.removeItem('username');
+        localStorage.removeItem('email');
         localStorage.removeItem('userId');
         localStorage.removeItem('roles');
 
