@@ -3,7 +3,6 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "deploy": "npm run build && firebase deploy",
         "dev": "vue-cli-service serve --mode dev",
         "prod": "vue-cli-service serve --mode prod",
         "serve": "vue-cli-service serve --mode prod",
