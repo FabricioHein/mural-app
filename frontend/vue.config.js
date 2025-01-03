@@ -41,7 +41,7 @@ module.exports = {
     devServer: {
         proxy: {
             '/api': {
-                target: 'https://mural-app.onrender.com',
+                target: process.env.BACKEND,
                 changeOrigin: true,
                 rewrite: (path) => path.replace(/^\/api/, ''),
                 secure: true,
