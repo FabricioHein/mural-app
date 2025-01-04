@@ -5,7 +5,7 @@ class ApiClient {
   constructor() {
     this.toast = useToast();
     this.api = axios.create({
-      baseURL: 'http://localhost:8080',
+      baseURL: process.env.BACKEND,
       headers: {
         'Content-Type': 'application/json',
       },
