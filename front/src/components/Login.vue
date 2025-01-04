@@ -3,10 +3,10 @@
     <h2 class="title has-text-centered">Login</h2>
     <form @submit.prevent="handleSubmit" class="box">
       <div class="field">
-        <label class="label" for="email">Email</label>
+        <label class="label" for="username">Usuário</label>
         <div class="control">
-          <input class="input" type="text" id="email" v-model="formData.email" required
-            placeholder="Digite o seu email" />
+          <input class="input" type="text" id="username" v-model="formData.username" required
+            placeholder="Digite o seu username" />
         </div>
       </div>
 
@@ -36,7 +36,7 @@ export default {
   data() {
     return {
       formData: {
-        email: '',
+        username: '',
         password: '',
       },
       passwordError: false,
@@ -91,7 +91,7 @@ export default {
 
         // Armazenar o accessToken no localStorage
         localStorage.setItem('accessToken', response.accessToken);
-        localStorage.setItem('email', response.email);
+        localStorage.setItem('username', response.username);
         localStorage.setItem('userId', response.id);
         localStorage.setItem('roles', response.roles[0]);
 
@@ -132,7 +132,7 @@ export default {
 
         // Se ocorrer erro, limpar os dados do localStorage
         localStorage.removeItem('accessToken');
-        localStorage.removeItem('email');
+        localStorage.removeItem('username');
         localStorage.removeItem('userId');
         localStorage.removeItem('roles');
 

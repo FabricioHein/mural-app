@@ -64,7 +64,7 @@ public class AuthController {
     try {
       // Autenticar usuário com email e senha
       Authentication authentication = authenticationManager.authenticate(
-              new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+              new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
       SecurityContextHolder.getContext().setAuthentication(authentication);
       String jwt = jwtUtils.generateJwtToken(authentication);
@@ -91,11 +91,11 @@ public class AuthController {
     } catch (UsernameNotFoundException ex) {
       // Tratativa para usuário não encontrado
       return ResponseEntity.status(HttpStatus.NOT_FOUND)
-              .body(Collections.singletonMap("message", "Error: Não encontrado usuário com esse email: " + loginRequest.getEmail()));
+              .body(Collections.singletonMap("message", "Error: Não encontrado usuário com esse usuario: " + loginRequest.getUsername()));
     } catch (BadCredentialsException ex) {
       // Tratativa para credenciais inválidas
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-              .body(Collections.singletonMap("message", "Error: Email ou Senha Inválidos!"));
+              .body(Collections.singletonMap("message", "Error: usuario ou Senha Inválidos!"));
     } catch (Exception ex) {
       // Tratativa para erros gerais
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

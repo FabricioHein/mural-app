@@ -10,7 +10,7 @@
 
     <form @submit.prevent="handleSubmit" class="box">
       <div class="field">
-        <label class="label" for="username">Nome</label>
+        <label class="label" for="username">Usuário</label>
         <div class="control">
           <input class="input" type="text" id="username" v-model="formData.username" required
             placeholder="Digite o nome do convidado" />
