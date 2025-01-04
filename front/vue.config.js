@@ -13,15 +13,7 @@ module.exports = {
         port: 8080,
         https: false,
         hotOnly: false,
-        proxy: {
-            '/api': {
-                target: process.env.BACKEND,
-                changeOrigin: true,
-                rewrite: (path) => path.replace(/^\/api/, ''),
-                secure: true,
-
-            }      
-        },
+        proxy: 'https://mural-app.onrender.com',
         disableHostCheck: true,
     },
 
@@ -45,5 +37,16 @@ module.exports = {
 
             },
         },
-    }
+    },
+    devServer: {
+        proxy: {
+            '/api': {
+                target: 'https://mural-app.onrender.com',
+                changeOrigin: true,
+                rewrite: (path) => path.replace(/^\/api/, ''),
+                secure: true,
+
+            }      
+        },
+    },
 };

@@ -5,19 +5,19 @@ const routes = [
     path: '/',
     name: 'Home',
     component: () => import('@/views/Home.vue'),
-    meta: { requiresAuth: false }, // Protege a rota
+    meta: { requiresAuth: false },
   },
   {
     path: '/gravarVideo',
     name: 'CaptureMedia',
     component: () => import('@/components/CaptureMedia.vue'),
-    meta: { requiresAuth: true }, // Protege a rota
+    meta: { requiresAuth: true },
   },
   {
     path: '/dados-casamento',
     name: 'dados-casamento',
     component: () => import('@/components/FormCasamento.vue'),
-    meta: { requiresAuth: true }, // Protege a rota
+    meta: { requiresAuth: true },
   },
   {
     path: '/auth/signin',
@@ -41,50 +41,50 @@ const routes = [
     path: '/menu',
     name: 'Menu',
     component: () => import('@/views/Menu.vue'),
-    meta: { requiresAuth: true }, // Protege a rota
+    meta: { requiresAuth: true },
   },
   {
     path: '/mural',
     name: 'mural',
     component: () => import('@/components/Mural.vue'),
-    meta: { requiresAuth: true }, // Protege a rota
+    meta: { requiresAuth: true },
   },
   {
     path: '/casamento',
     name: 'casamento',
     component: () => import('@/views/Casamento.vue'),
-    meta: { requiresNoAuth: false }, // Protege se já estiver logado
+    meta: { requiresAuth: false },
   },
 ];
 
 const router = createRouter({
   history: createWebHistory(),
-  routes, // Definindo as rotas
+  routes, // Defining routes
 });
 
-// Guarda de navegação global
+// Global navigation guard
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('accessToken'); // Obtém o token do localStorage
+  const token = localStorage.getItem('accessToken'); // Retrieve token from localStorage
 
-  // Captura o UUID da query string
+  // Capture the UUID from query string
   const uuid = to.query.uuid;
-  console.log('UUID capturado:', uuid);
+  console.log('UUID captured:', uuid);
 
-  // Verifica se a rota requer autenticação e se o usuário não está logado
+  // If the route requires authentication and no token exists
   if (to.meta.requiresAuth && !token) {
     next({
       path: '/auth/signup',
-      query: { uuid }, // Repassa o UUID ou outro parâmetro se necessário
+      query: { uuid }, // Pass the UUID or other parameters if necessary
     });
   }
-  // Verifica se a rota exige que o usuário não esteja logado (para impedir o acesso a cadastros)
+  // If the route requires no authentication but the user is already logged in
   else if (to.meta.requiresNoAuth && token) {
     next({
       path: '/menu',
-      query: { uuid }, // Repassa o UUID ou outro parâmetro ao redirecionar para o menu
+      query: { uuid }, // Pass the UUID to redirect to the menu
     });
   } else {
-    next(); // Caso contrário, permite o acesso
+    next(); // Otherwise, continue navigation
   }
 });
 
