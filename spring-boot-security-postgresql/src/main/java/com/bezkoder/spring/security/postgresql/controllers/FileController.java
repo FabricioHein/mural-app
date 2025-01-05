@@ -15,7 +15,7 @@ import java.nio.file.Paths;
 
 @RestController
 @CrossOrigin(
-        origins = "*", // Substitua pela URL do seu frontend
+        origins = "https://muralnoivos.web.app", // Substitua pela URL do seu frontend
         allowedHeaders = {"Authorization", "Content-Type", "Accept"}, // Cabeçalhos permitidos
         methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE}, // Métodos permitidos
         allowCredentials = "true" // Permite credenciais (cookies, tokens, etc.)

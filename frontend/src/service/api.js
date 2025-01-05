@@ -11,7 +11,7 @@ class ApiClient {
         'Accept': 'application/json', // Aceitar respostas JSON
       },
     });
-    this.api.defaults.headers.common['Access-Control-Allow-Origin'] = '*'; // Permite todas as origens (não é ideal)
+    this.api.defaults.headers.common['Access-Control-Allow-Origin'] = 'https://mural-app.onrender.com'; // Permite todas as origens (não é ideal)
 
     // Interceptor para adicionar o token Bearer automaticamente
     this.api.interceptors.request.use(
