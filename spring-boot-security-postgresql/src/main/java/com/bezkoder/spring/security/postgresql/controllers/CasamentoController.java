@@ -13,7 +13,13 @@ import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/casamento")
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(
+        origins = "https://muralnoivos.web.app",
+        allowedHeaders = {"Authorization", "Content-Type", "Accept"},
+        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS},
+        allowCredentials = "true",
+        maxAge = 3600
+)
 public class CasamentoController {
 
     @Autowired

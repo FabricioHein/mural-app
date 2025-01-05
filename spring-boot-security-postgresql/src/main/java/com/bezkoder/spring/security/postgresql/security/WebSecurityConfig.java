@@ -3,6 +3,7 @@ package com.bezkoder.spring.security.postgresql.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 //import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -20,6 +21,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.bezkoder.spring.security.postgresql.security.jwt.AuthEntryPointJwt;
 import com.bezkoder.spring.security.postgresql.security.jwt.AuthTokenFilter;
 import com.bezkoder.spring.security.postgresql.security.services.UserDetailsServiceImpl;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableMethodSecurity
@@ -69,34 +72,37 @@ public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
     return new BCryptPasswordEncoder();
   }
 
-//  @Override
-//  protected void configure(HttpSecurity http) throws Exception {
-//    http.cors().and().csrf().disable()
-//      .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-//      .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-//      .authorizeRequests().antMatchers("/api/auth/**").permitAll()
-//      .antMatchers("/api/test/**").permitAll()
-//      .anyRequest().authenticated();
-//
-//    http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-//  }
-  
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.csrf(csrf -> csrf.disable())
-        .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> 
-          auth.requestMatchers("/api/auth/**").permitAll()
-              .requestMatchers("/api/wedding-data/**").permitAll()
-                  .requestMatchers("/uploads/**").permitAll()
-                  .anyRequest().authenticated()
-        );
-    
-    http.authenticationProvider(authenticationProvider());
+    // Configuração de CORS
+    http.csrf(csrf -> csrf.disable()) // Desabilita CSRF (não necessário para APIs REST com JWT)
+            .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler)) // Gerenciador de exceções
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Sem estado, pois estamos usando JWT
+            .authorizeHttpRequests(auth ->
+                    auth.requestMatchers("/api/auth/**").permitAll() // Libera acesso para as rotas de autenticação
+                            .requestMatchers("/api/wedding-data/**").permitAll() // Libera para dados de casamento
+                            .requestMatchers("/uploads/**").permitAll() // Libera uploads
+                            .anyRequest().authenticated() // Exige autenticação para o restante
+            );
 
+    // Adiciona filtro JWT para autenticação baseado no token
+    http.authenticationProvider(authenticationProvider());
     http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-    
+
     return http.build();
+  }
+
+  @Bean
+  public WebMvcConfigurer corsConfigurer() {
+    return new WebMvcConfigurer() {
+      @Override
+      public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**") // Aplica para todos os endpoints
+                .allowedOrigins("https://muralnoivos.web.app") // Substitua pela URL do seu frontend
+                .allowedMethods(HttpMethod.GET.name(), HttpMethod.POST.name(), HttpMethod.PUT.name(), HttpMethod.DELETE.name(), HttpMethod.OPTIONS.name()) // Permite os métodos necessários, incluindo OPTIONS
+                .allowedHeaders("Authorization", "Content-Type", "Accept") // Cabeçalhos permitidos
+                .allowCredentials(true); // Permite credenciais
+      }
+    };
   }
 }
