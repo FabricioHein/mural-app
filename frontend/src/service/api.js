@@ -10,8 +10,8 @@ class ApiClient {
         'Content-Type': 'application/json', // Tipo de conteúdo JSON
         'Accept': 'application/json', // Aceitar respostas JSON
       },
+      withCredentials: true, // Necessário para enviar credenciais (cookies ou tokens) com a requisição
     });
-    this.api.defaults.headers.common['Access-Control-Allow-Origin'] = 'https://mural-app.onrender.com'; 
 
     // Interceptor para adicionar o token Bearer automaticamente
     this.api.interceptors.request.use(
@@ -46,9 +46,7 @@ class ApiClient {
 
   async post(url, data, msg) {
     try {
-      const response = await this.api.post(url, data, {
-        method: 'post'
-      });
+      const response = await this.api.post(url, data);
       this.toast.success(msg || 'Dados enviados com sucesso!');
       return response.data;
     } catch (error) {
@@ -59,13 +57,10 @@ class ApiClient {
   async postFormData(url, data) {
     try {
       const response = await this.api.post(url, data, {
-        method: 'post',
         headers: {
-          'Content-Type': 'multipart/form-data',
-
+          'Content-Type': 'multipart/form-data', // Para envio de FormData
         },
       });
-
       this.toast.success('Dados enviados com sucesso!');
       return response.data;
     } catch (error) {
@@ -76,12 +71,10 @@ class ApiClient {
   async putFormData(url, data) {
     try {
       const response = await this.api.put(url, data, {
-        method: 'put',
         headers: {
           'Content-Type': 'multipart/form-data', // Para envio de FormData
         },
       });
-
       this.toast.success('Dados atualizados com sucesso!');
       return response.data;
     } catch (error) {
@@ -91,12 +84,7 @@ class ApiClient {
 
   async put(url, data) {
     try {
-      const response = await this.api.put(url, data, {
-        method: 'put',
-        headers: {
-          'Content-Type': 'application/json', // Confirmando o tipo de conteúdo JSON
-        },
-      });
+      const response = await this.api.put(url, data);
       this.toast.success('Dados atualizados com sucesso!');
       return response.data;
     } catch (error) {
@@ -116,9 +104,7 @@ class ApiClient {
 
   async register(data) {
     try {
-      await this.api.post('/api/auth/signup', data, {
-        method: 'post',
-      });
+      await this.api.post('/api/auth/signup', data);
       this.toast.success('Cadastrado com Sucesso!');
     } catch (error) {
       this.toast.error(error.message);
@@ -128,9 +114,7 @@ class ApiClient {
 
   async login(data) {
     try {
-      const response = await this.api.post('/api/auth/signin', data, {
-        method: 'post',
-      });
+      const response = await this.api.post('/api/auth/signin', data);
       this.toast.success('Logado com Sucesso!');
       return response.data;
     } catch (error) {
