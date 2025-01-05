@@ -35,7 +35,7 @@ import com.bezkoder.spring.security.postgresql.repository.UserRepository;
 import com.bezkoder.spring.security.postgresql.security.jwt.JwtUtils;
 import com.bezkoder.spring.security.postgresql.security.services.UserDetailsImpl;
 
-@CrossOrigin(origins = "*", maxAge = 3600) // Permite apenas o frontend do Vite
+@CrossOrigin(origins = "*", allowedHeaders = "Authorization, Content-Type", maxAge = 3600) // Adapte conforme necessário
 
 @RestController
 @RequestMapping("/api/auth")

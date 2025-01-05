@@ -11,7 +11,8 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/wedding-data")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*", allowedHeaders = "Authorization, Content-Type", maxAge = 3600) // Adapte conforme necessário
+
 public class WeddingDataController {
 
     @Autowired

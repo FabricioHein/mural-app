@@ -19,7 +19,8 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/posts")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*", allowedHeaders = "Authorization, Content-Type", maxAge = 3600) // Adapte conforme necessário
+
 
 public class PostController {
 

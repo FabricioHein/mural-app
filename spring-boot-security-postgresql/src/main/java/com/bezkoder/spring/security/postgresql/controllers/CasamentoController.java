@@ -13,7 +13,7 @@ import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/casamento")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*", allowedHeaders = "Authorization, Content-Type", maxAge = 3600) // Adapte conforme necessário
 
 public class CasamentoController {
 
