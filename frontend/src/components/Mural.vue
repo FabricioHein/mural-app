@@ -26,8 +26,10 @@ export default {
       try {
           const apiClient = new ApiClient();
 
-          apiClient.get(`/api/posts/${this.weddingData.id}`).then((response) => {
-            this.posts = response;
+        const response = await apiClient.get(`/api/posts/${this.weddingData.id}`);
+
+
+        this.posts = response;
 
             // Transformar reações no formato correto
             this.posts.forEach((post) => {
@@ -54,7 +56,8 @@ export default {
                 });
               }
             });
-          });
+
+
         } catch (error) {
           console.error('Erro ao carregar os posts:', error);
         }

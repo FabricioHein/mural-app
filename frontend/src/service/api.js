@@ -33,9 +33,9 @@ class ApiClient {
   }
 
   // Métodos para as requisições
-  async get(url, params = {}) {
+  async get(url) {
     try {
-      const response = await this.api.get(url, { params });
+      const response = await this.api.get(url);
 
       return response.data;
     } catch (error) {
