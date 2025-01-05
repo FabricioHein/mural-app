@@ -35,7 +35,11 @@ class ApiClient {
   // Métodos para as requisições
   async get(url) {
     try {
-      const response = await this.api.get(url);
+      const response = await this.api.get(url, {
+        headers: {
+          'Accept': 'application/json', // Adicionando header de Aceitação
+        },
+      });
 
       return response.data;
     } catch (error) {
@@ -45,8 +49,12 @@ class ApiClient {
 
   async post(url, data, msg) {
     try {
-      const response = await this.api.post(url, data);
-      this.toast.success(msg || 'Dados enviados com sucesso!')
+      const response = await this.api.post(url, data, {
+        headers: {
+          'Content-Type': 'application/json', // Confirmando o tipo de conteúdo JSON
+        },
+      });
+      this.toast.success(msg || 'Dados enviados com sucesso!');
       return response.data;
     } catch (error) {
       this.handleError(error);
@@ -57,7 +65,7 @@ class ApiClient {
     try {
       const response = await this.api.post(url, data, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'multipart/form-data', // Para envio de FormData
         },
       });
 
@@ -67,11 +75,12 @@ class ApiClient {
       this.handleError(error);
     }
   }
+
   async putFormData(url, data) {
     try {
       const response = await this.api.put(url, data, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'multipart/form-data', // Para envio de FormData
         },
       });
 
@@ -84,7 +93,11 @@ class ApiClient {
 
   async put(url, data) {
     try {
-      const response = await this.api.put(url, data);
+      const response = await this.api.put(url, data, {
+        headers: {
+          'Content-Type': 'application/json', // Confirmando o tipo de conteúdo JSON
+        },
+      });
       this.toast.success('Dados atualizados com sucesso!');
       return response.data;
     } catch (error) {
@@ -94,25 +107,39 @@ class ApiClient {
 
   async delete(url) {
     try {
-      const response = await this.api.delete(url);
+      const response = await this.api.delete(url, {
+        headers: {
+          'Accept': 'application/json', // Adicionando header de Aceitação
+        },
+      });
       this.toast.success('Item excluído com sucesso!');
       return response.data;
     } catch (error) {
       this.handleError(error);
     }
   }
+
   async register(data) {
     try {
-      await this.api.post('/api/auth/signup', data);
+      await this.api.post('/api/auth/signup', data, {
+        headers: {
+          'Content-Type': 'application/json', // Confirmando o tipo de conteúdo JSON
+        },
+      });
       this.toast.success('Cadastrado com Sucesso!');
     } catch (error) {
       this.toast.error(error.message);
       this.handleError(error);
     }
   }
+
   async login(data) {
     try {
-      const response = await this.api.post('/api/auth/signin', data);
+      const response = await this.api.post('/api/auth/signin', data, {
+        headers: {
+          'Content-Type': 'application/json', // Confirmando o tipo de conteúdo JSON
+        },
+      });
       this.toast.success('Logado com Sucesso!');
       return response.data;
     } catch (error) {
@@ -136,7 +163,6 @@ class ApiClient {
       if (error.response.status === 401 && !error.response.data.message) {
         localStorage.removeItem('accessToken');
         this.toast.error('Error no acesso, tente novamente.');
-       // window.location.reload();
         return; // Evita lançar o erro novamente após o tratamento
       }
     } else if (error.request) {
@@ -149,7 +175,6 @@ class ApiClient {
 
     throw error;
   }
-
 }
 
 export default ApiClient;
