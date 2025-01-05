@@ -5,22 +5,16 @@ class ApiClient {
   constructor() {
     this.toast = useToast();
     this.api = axios.create({
-      baseURL: process.env.VUE_APP_API_URL || 'https://mural-app.onrender.com',
+      baseURL: 'https://mural-app.onrender.com',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      }
+      },
     });
 
-    // Interceptor para adicionar o token Bearer e headers CORS
+    // Interceptor para adicionar o token Bearer automaticamente
     this.api.interceptors.request.use(
       async (config) => {
-        // Headers CORS padrão
-        config.headers['Access-Control-Allow-Origin'] = '*';
-        config.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,PATCH,OPTIONS';
-        config.headers['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept, Authorization';
-
-        const token = await this.getToken();
+        const token = await this.getToken(); // Obtém o token (implemente a lógica para obtê-lo)
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
@@ -30,30 +24,19 @@ class ApiClient {
         return Promise.reject(error);
       }
     );
-
-    // Interceptor para tratamento de respostas
-    this.api.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error.response && error.response.status === 0) {
-          // CORS error
-          this.toast.error('Erro de conexão com o servidor. Verifique se o CORS está configurado corretamente.');
-        }
-        return Promise.reject(error);
-      }
-    );
   }
 
+  // Método para definir como o token será obtido
   async getToken() {
+    // Substitua pela lógica para obter o token (ex.: localStorage, sessionStorage, API, etc.)
     return localStorage.getItem('accessToken');
   }
 
+  // Métodos para as requisições
   async get(url, params = {}) {
     try {
-      const response = await this.api.get(url, { 
-        params,
-        headers: this.getHeaders() 
-      });
+      const response = await this.api.get(url, { params });
+
       return response.data;
     } catch (error) {
       this.handleError(error);
@@ -62,9 +45,7 @@ class ApiClient {
 
   async post(url, data, msg) {
     try {
-      const response = await this.api.post(url, data, {
-        headers: this.getHeaders()
-      });
+      const response = await this.api.post(url, data);
       this.toast.success(msg || 'Dados enviados com sucesso!')
       return response.data;
     } catch (error) {
@@ -76,25 +57,24 @@ class ApiClient {
     try {
       const response = await this.api.post(url, data, {
         headers: {
-          ...this.getHeaders(),
           'Content-Type': 'multipart/form-data',
         },
       });
+
       this.toast.success('Dados enviados com sucesso!');
       return response.data;
     } catch (error) {
       this.handleError(error);
     }
   }
-
   async putFormData(url, data) {
     try {
       const response = await this.api.put(url, data, {
         headers: {
-          ...this.getHeaders(),
           'Content-Type': 'multipart/form-data',
         },
       });
+
       this.toast.success('Dados enviados com sucesso!');
       return response.data;
     } catch (error) {
@@ -104,9 +84,7 @@ class ApiClient {
 
   async put(url, data) {
     try {
-      const response = await this.api.put(url, data, {
-        headers: this.getHeaders()
-      });
+      const response = await this.api.put(url, data);
       this.toast.success('Dados atualizados com sucesso!');
       return response.data;
     } catch (error) {
@@ -116,33 +94,25 @@ class ApiClient {
 
   async delete(url) {
     try {
-      const response = await this.api.delete(url, {
-        headers: this.getHeaders()
-      });
+      const response = await this.api.delete(url);
       this.toast.success('Item excluído com sucesso!');
       return response.data;
     } catch (error) {
       this.handleError(error);
     }
   }
-
   async register(data) {
     try {
-      await this.api.post('/api/auth/signup', data, {
-        headers: this.getHeaders()
-      });
+      await this.api.post('/api/auth/signup', data);
       this.toast.success('Cadastrado com Sucesso!');
     } catch (error) {
       this.toast.error(error.message);
       this.handleError(error);
     }
   }
-
   async login(data) {
     try {
-      const response = await this.api.post('/api/auth/signin', data, {
-        headers: this.getHeaders()
-      });
+      const response = await this.api.post('/api/auth/signin', data);
       this.toast.success('Logado com Sucesso!');
       return response.data;
     } catch (error) {
@@ -150,16 +120,7 @@ class ApiClient {
     }
   }
 
-  // Método auxiliar para obter headers padrão
-  getHeaders() {
-    return {
-      'Accept': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
-      'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
-    };
-  }
-
+  // Método para tratar erros
   handleError(error) {
     console.error('API Error:', error);
 
@@ -175,7 +136,8 @@ class ApiClient {
       if (error.response.status === 401 && !error.response.data.message) {
         localStorage.removeItem('accessToken');
         this.toast.error('Error no acesso, tente novamente.');
-        return;
+       // window.location.reload();
+        return; // Evita lançar o erro novamente após o tratamento
       }
     } else if (error.request) {
       console.error('Request data:', error.request);
@@ -187,6 +149,7 @@ class ApiClient {
 
     throw error;
   }
+
 }
 
 export default ApiClient;
