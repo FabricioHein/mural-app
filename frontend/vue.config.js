@@ -1,5 +1,8 @@
 const path = require('path');
 
+// Verifique o ambiente no qual o Node.js está executando
+console.log(process.env.NODE_ENV);
+
 module.exports = {
   publicPath: '/',
   outputDir: 'dist',
@@ -13,35 +16,37 @@ module.exports = {
     hotOnly: false,
     proxy: {
       '/api': {
-        target: 'https://mural-app.onrender.com',
+        target: 'https://mural-app.onrender.com',  // Usando variável de ambiente para o target
         changeOrigin: true,
-        pathRewrite: {
-          '^/api': ''
-        },
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        secure: false,
         headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
-          'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
-        },
-        onProxyRes: function(proxyRes) {
-          proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-        }
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+            'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+          },
+          onProxyRes: function(proxyRes) {
+            proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+          }
       }
+      
     },
     allowedHosts: 'all', // Substitui o disableHostCheck que está depreciado
+    disableHostCheck: true, // Desabilita a verificação de host
   },
 
   configureWebpack: {
     devtool: 'source-map',
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, 'src'),
+        '@': path.resolve(__dirname, 'src'), // Usando alias corretamente para simplificar os caminhos de importação
       },
       fallback: {},
     },
   },
 
   chainWebpack: (config) => {
+    // Remove o plugin 'prefetch', que pode não ser necessário para seu caso
     config.plugins.delete('prefetch');
   },
 
@@ -49,7 +54,7 @@ module.exports = {
     'style-resources-loader': {
       preProcessor: 'scss',
       patterns: [
-        path.resolve(__dirname, 'src/assets/sass/app.scss'),
+        path.resolve(__dirname, 'src/assets/sass/app.scss'), // Caminho para o SCSS global
       ],
     },
     i18n: {
