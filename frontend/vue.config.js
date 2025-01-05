@@ -20,18 +20,9 @@ module.exports = {
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
         secure: false,
-        headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
-            'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
-          },
-          onProxyRes: function(proxyRes) {
-            proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-          }
       }
       
     },
-    allowedHosts: 'all', // Substitui o disableHostCheck que está depreciado
     disableHostCheck: true, // Desabilita a verificação de host
   },
 
