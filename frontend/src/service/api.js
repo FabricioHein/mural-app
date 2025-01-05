@@ -9,8 +9,7 @@ class ApiClient {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-      },
-      withCredentials: true, // Importante para CORS com cookies
+      }
     });
 
     // Interceptor para adicionar o token Bearer e headers CORS
