@@ -10,12 +10,22 @@ module.exports = {
     runtimeCompiler: false,
     productionSourceMap: false,
     devServer: {
-        port: 3000,
-        https: false,
-        hotOnly: false,
-        proxy: null,
-        disableHostCheck: true,
+      port: 3000,
+      https: false,
+      hotOnly: false,
+      proxy: {
+        '/api': {
+            target: process.env.BACKEND,
+            // target: 'https://us-central1-linkkoub-prod.cloudfunctions.net/backend',
+            changeOrigin: true,
+            rewrite: (path) => path.replace(/^\/api/, ''),
+            secure: true,
+
+        }         
     },
+      disableHostCheck: true,
+    },
+    
 
     configureWebpack: {
         devtool: 'source-map'
@@ -23,7 +33,21 @@ module.exports = {
     chainWebpack: config => {
         config.plugins.delete('prefetch');
     },
-
+    pluginOptions: {
+        'style-resources-loader': {
+            preProcessor: 'scss',
+            patterns: [
+                       path.resolve(__dirname, 'src/assets/sass/app.scss')
+                // Adicione caminhos para seus arquivos SCSS globais, se necessário
+            ]
+        },
+        i18n: {
+            locale: 'en',
+            fallbackLocale: 'en',
+            localeDir: 'locales',
+            enableInSFC: false,
+        },
+    },
     chainWebpack: (config) => {
         // Remove prefetch plugin and that's it!
         config.plugins.delete('prefetch');
@@ -31,22 +55,11 @@ module.exports = {
     configureWebpack: {
         resolve: {
             alias: {
-                '@': path.resolve(__dirname, './src'),
+                '@themeConfig': path.resolve(__dirname, 'theme.config.js'),
             },
             fallback: {
 
             },
         },
-    },
-    devServer: {
-        proxy: {
-            '/api': {
-                target: 'https://mural-app.onrender.com',
-                changeOrigin: true,
-                rewrite: (path) => path.replace(/^\/api/, ''),
-                secure: true,
-
-            }      
-        },
-    },
+    }
 };
