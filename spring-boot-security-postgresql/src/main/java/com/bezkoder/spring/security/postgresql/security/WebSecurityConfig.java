@@ -21,6 +21,11 @@ import com.bezkoder.spring.security.postgresql.security.jwt.AuthEntryPointJwt;
 import com.bezkoder.spring.security.postgresql.security.jwt.AuthTokenFilter;
 import com.bezkoder.spring.security.postgresql.security.services.UserDetailsServiceImpl;
 
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+
 @Configuration
 @EnableMethodSecurity
 public class WebSecurityConfig implements WebMvcConfigurer {
@@ -59,17 +64,22 @@ public class WebSecurityConfig implements WebMvcConfigurer {
   }
 
   // Configuração do CORS
-  @Override
-  public void addCorsMappings(CorsRegistry registry) {
-    registry.addMapping("/**")
-            .allowedOrigins("https://muralnoivos.web.app") // Coloque o seu domínio permitido
-            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-            .allowedHeaders("Authorization", "Content-Type", "Accept")
-            .allowCredentials(true)  // Permite credenciais, como cookies e tokens
-            .maxAge(3600);  // Tempo máximo para cache de CORS (em segundos)
+  @Bean
+  public UrlBasedCorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration configuration = new CorsConfiguration();
+    configuration.setAllowedOriginPatterns(Arrays.asList("https://muralnoivos.web.app", "https://*.web.app")); // Padrão para origens
+    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+    configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
+    configuration.setAllowCredentials(true); // Habilita envio de credenciais (cookies/tokens)
+    configuration.setMaxAge(3600L); // Tempo de cache
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration); // Aplica para todos os endpoints
+
+    return source;
   }
 
-  // Configuração de segurança para as rotas da API
+  // Método para configurar as rotas da API
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
     http.csrf(csrf -> csrf.disable())
@@ -80,7 +90,8 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                             .requestMatchers("/api/wedding-data/**").permitAll()
                             .requestMatchers("/uploads/**").permitAll()
                             .anyRequest().authenticated()
-            );
+            )
+            .cors(cors -> cors.configurationSource(corsConfigurationSource())); // Configuração de CORS atualizada
 
     http.authenticationProvider(authenticationProvider());
 
@@ -88,5 +99,16 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
+  }
+
+  // Método para configurar CORS no Spring MVC
+  @Override
+  public void addCorsMappings(CorsRegistry registry) {
+    registry.addMapping("/**")
+            .allowedOrigins("https://muralnoivos.web.app", "https://*.web.app")
+            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+            .allowedHeaders("Authorization", "Content-Type", "Accept")
+            .allowCredentials(true)
+            .maxAge(3600);
   }
 }
