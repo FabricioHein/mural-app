@@ -5,10 +5,7 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -17,8 +14,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @RestController
-@CrossOrigin(origins = "*", allowedHeaders = "Authorization, Content-Type", maxAge = 3600) // Adapte conforme necessário
-
+@CrossOrigin(
+        origins = "*", // Substitua pela URL do seu frontend
+        allowedHeaders = {"Authorization", "Content-Type", "Accept"}, // Cabeçalhos permitidos
+        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE}, // Métodos permitidos
+        allowCredentials = "true" // Permite credenciais (cookies, tokens, etc.)
+)
 public class FileController {
 
     private static final String UPLOAD_DIR = "uploads";  // Caminho relativo é mais seguro

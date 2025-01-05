@@ -13,7 +13,12 @@ import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/casamento")
-@CrossOrigin(origins = "*", allowedHeaders = "Authorization, Content-Type", maxAge = 3600) // Adapte conforme necessário
+@CrossOrigin(
+        origins = "*", // Substitua pela URL do seu frontend
+        allowedHeaders = {"Authorization", "Content-Type", "Accept"}, // Cabeçalhos permitidos
+        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE}, // Métodos permitidos
+        allowCredentials = "true" // Permite credenciais (cookies, tokens, etc.)
+)
 
 public class CasamentoController {
 
