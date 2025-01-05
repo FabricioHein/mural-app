@@ -11,12 +11,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/wedding-data")
-@CrossOrigin(
-        origins = "https://muralnoivos.web.app", // Substitua pela URL do seu frontend
-        allowedHeaders = {"Authorization", "Content-Type", "Accept"}, // Cabeçalhos permitidos
-        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE}, // Métodos permitidos
-        allowCredentials = "true" // Permite credenciais (cookies, tokens, etc.)
-)
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class WeddingDataController {
 
     @Autowired
