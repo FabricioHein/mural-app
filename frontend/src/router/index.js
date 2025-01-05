@@ -50,8 +50,11 @@ const routes = [
     meta: { requiresAuth: true }, // Protege a rota
   },
   {
-    path: '/casamento',
+    path: '/casamento?uuid=:uuid',
     name: 'casamento',
+    props: (route) => ({
+      uuid: route.query.uuid,
+  }),
     component: () => import('@/views/Casamento.vue'),
     meta: { requiresNoAuth: false }, // Protege se já estiver logado
   },
