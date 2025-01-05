@@ -10,12 +10,12 @@ module.exports = {
     runtimeCompiler: false,
     productionSourceMap: false,
     devServer: {
-      port: 3000,
+      port: 8080,
       https: false,
       hotOnly: false,
       proxy: {
         '/api': {
-            target: process.env.BACKEND,
+            target: 'https://mural-app.onrender.com',
             // target: 'https://us-central1-linkkoub-prod.cloudfunctions.net/backend',
             changeOrigin: true,
             rewrite: (path) => path.replace(/^\/api/, ''),
