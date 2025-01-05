@@ -6,103 +6,87 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-//import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-//import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-//import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.bezkoder.spring.security.postgresql.security.jwt.AuthEntryPointJwt;
 import com.bezkoder.spring.security.postgresql.security.jwt.AuthTokenFilter;
 import com.bezkoder.spring.security.postgresql.security.services.UserDetailsServiceImpl;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableMethodSecurity
-// (securedEnabled = true,
-// jsr250Enabled = true,
-// prePostEnabled = true) // by default
-public class WebSecurityConfig { // extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig implements WebMvcConfigurer {
+
   @Autowired
   UserDetailsServiceImpl userDetailsService;
 
   @Autowired
   private AuthEntryPointJwt unauthorizedHandler;
 
+  // Bean do filtro JWT para interceptar as requisições
   @Bean
   public AuthTokenFilter authenticationJwtTokenFilter() {
     return new AuthTokenFilter();
   }
 
-//  @Override
-//  public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-//    authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
-//  }
-  
+  // Configuração para a autenticação do usuário
   @Bean
   public DaoAuthenticationProvider authenticationProvider() {
-      DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-       
-      authProvider.setUserDetailsService(userDetailsService);
-      authProvider.setPasswordEncoder(passwordEncoder());
-   
-      return authProvider;
+    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+    authProvider.setUserDetailsService(userDetailsService);
+    authProvider.setPasswordEncoder(passwordEncoder());
+    return authProvider;
   }
 
-//  @Bean
-//  @Override
-//  public AuthenticationManager authenticationManagerBean() throws Exception {
-//    return super.authenticationManagerBean();
-//  }
-  
+  // Gerenciar a autenticação
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
     return authConfig.getAuthenticationManager();
   }
 
+  // Codificador de senhas
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
 
+  // Configuração do CORS
+  @Override
+  public void addCorsMappings(CorsRegistry registry) {
+    registry.addMapping("/**")
+            .allowedOrigins("https://muralnoivos.web.app") // Coloque o seu domínio permitido
+            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+            .allowedHeaders("Authorization", "Content-Type", "Accept")
+            .allowCredentials(true)  // Permite credenciais, como cookies e tokens
+            .maxAge(3600);  // Tempo máximo para cache de CORS (em segundos)
+  }
+
+  // Configuração de segurança para as rotas da API
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    // Configuração de CORS
-    http.csrf(csrf -> csrf.disable()) // Desabilita CSRF (não necessário para APIs REST com JWT)
-            .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler)) // Gerenciador de exceções
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Sem estado, pois estamos usando JWT
+    http.csrf(csrf -> csrf.disable())
+            .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth ->
-                    auth.requestMatchers("/api/auth/**").permitAll() // Libera acesso para as rotas de autenticação
-                            .requestMatchers("/api/wedding-data/**").permitAll() // Libera para dados de casamento
-                            .requestMatchers("/uploads/**").permitAll() // Libera uploads
-                            .anyRequest().authenticated() // Exige autenticação para o restante
+                    auth.requestMatchers("/api/auth/**").permitAll()
+                            .requestMatchers("/api/wedding-data/**").permitAll()
+                            .requestMatchers("/uploads/**").permitAll()
+                            .anyRequest().authenticated()
             );
 
-    // Adiciona filtro JWT para autenticação baseado no token
     http.authenticationProvider(authenticationProvider());
+
+    // Adiciona o filtro JWT antes do filtro de autenticação do usuário
     http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
-  }
-
-  @Bean
-  public WebMvcConfigurer corsConfigurer() {
-    return new WebMvcConfigurer() {
-      @Override
-      public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**") // Aplica para todos os endpoints
-                .allowedOrigins("https://muralnoivos.web.app") // Substitua pela URL do seu frontend
-                .allowedMethods(HttpMethod.GET.name(), HttpMethod.POST.name(), HttpMethod.PUT.name(), HttpMethod.DELETE.name(), HttpMethod.OPTIONS.name()) // Permite os métodos necessários, incluindo OPTIONS
-                .allowedHeaders("Authorization", "Content-Type", "Accept") // Cabeçalhos permitidos
-                .allowCredentials(true); // Permite credenciais
-      }
-    };
   }
 }
