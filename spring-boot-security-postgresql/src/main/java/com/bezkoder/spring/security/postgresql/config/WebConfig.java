@@ -15,13 +15,4 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResourceLocations("file:/path/to/uploads/"); // Caminho absoluto da pasta uploads
     }
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        // Permite requisições de qualquer origem
-        registry.addMapping("/**")
-                .allowedOrigins("*") // Permite qualquer origem
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("Authorization", "Content-Type")
-                .allowCredentials(false); // Desabilita credenciais (cookies, tokens, etc.)
-    }
 }
