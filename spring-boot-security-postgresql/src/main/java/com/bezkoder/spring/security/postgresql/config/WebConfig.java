@@ -19,9 +19,9 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         // Permite requisições de qualquer origem
         registry.addMapping("/**")
-                .allowedOrigins("https://muralnoivos.web.app") // Ou substitua "*" por um domínio específico, como "https://seusite.com"
+                .allowedOrigins("*") // Permite qualquer origem
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("Authorization", "Content-Type") // Cabeçalhos permitidos
-                .allowCredentials(true); // Permite enviar cookies se necessário
+                .allowedHeaders("Authorization", "Content-Type")
+                .allowCredentials(false); // Desabilita credenciais (cookies, tokens, etc.)
     }
 }
