@@ -46,7 +46,9 @@ class ApiClient {
 
   async post(url, data, msg) {
     try {
-      const response = await this.api.post(url, data);
+      const response = await this.api.post(url, data, {
+        method: 'post'
+      });
       this.toast.success(msg || 'Dados enviados com sucesso!');
       return response.data;
     } catch (error) {
@@ -57,8 +59,10 @@ class ApiClient {
   async postFormData(url, data) {
     try {
       const response = await this.api.post(url, data, {
+        method: 'post',
         headers: {
-          'Content-Type': 'multipart/form-data', // Para envio de FormData
+          'Content-Type': 'multipart/form-data',
+
         },
       });
 
@@ -72,6 +76,7 @@ class ApiClient {
   async putFormData(url, data) {
     try {
       const response = await this.api.put(url, data, {
+        method: 'put',
         headers: {
           'Content-Type': 'multipart/form-data', // Para envio de FormData
         },
@@ -87,6 +92,7 @@ class ApiClient {
   async put(url, data) {
     try {
       const response = await this.api.put(url, data, {
+        method: 'put',
         headers: {
           'Content-Type': 'application/json', // Confirmando o tipo de conteúdo JSON
         },
@@ -110,7 +116,9 @@ class ApiClient {
 
   async register(data) {
     try {
-      await this.api.post('/api/auth/signup', data);
+      await this.api.post('/api/auth/signup', data, {
+        method: 'post',
+      });
       this.toast.success('Cadastrado com Sucesso!');
     } catch (error) {
       this.toast.error(error.message);
@@ -120,7 +128,9 @@ class ApiClient {
 
   async login(data) {
     try {
-      const response = await this.api.post('/api/auth/signin', data);
+      const response = await this.api.post('/api/auth/signin', data, {
+        method: 'post',
+      });
       this.toast.success('Logado com Sucesso!');
       return response.data;
     } catch (error) {
