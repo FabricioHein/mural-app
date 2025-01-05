@@ -19,7 +19,7 @@ module.exports = {
         target: 'https://mural-app.onrender.com',  // Usando variável de ambiente para o target
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
-        secure: true,
+        secure: false,
       }
       
     },
