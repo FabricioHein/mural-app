@@ -16,7 +16,7 @@ module.exports = {
     hotOnly: false,
     proxy: {
       '/api': {
-        target: process.env.BACKEND,  // Usando variável de ambiente para o target
+        target: 'https://mural-app.onrender.com',  // Usando variável de ambiente para o target
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
         secure: true,

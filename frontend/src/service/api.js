@@ -5,6 +5,7 @@ class ApiClient {
   constructor() {
     this.toast = useToast();
     this.api = axios.create({
+      baseURL: 'https://mural-app.onrender.com',
       headers: {
         'Content-Type': 'application/json',
       },
