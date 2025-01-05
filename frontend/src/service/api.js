@@ -5,18 +5,20 @@ class ApiClient {
   constructor() {
     this.toast = useToast();
     this.api = axios.create({
-      baseURL: 'https://mural-app.onrender.com',
+      baseURL: 'https://mural-app.onrender.com', // Base URL da sua API
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json', // Tipo de conteúdo JSON
+        'Accept': 'application/json', // Aceitar respostas JSON
       },
     });
+    this.api.defaults.headers.common['Access-Control-Allow-Origin'] = '*'; // Permite todas as origens (não é ideal)
 
     // Interceptor para adicionar o token Bearer automaticamente
     this.api.interceptors.request.use(
       async (config) => {
         const token = await this.getToken(); // Obtém o token (implemente a lógica para obtê-lo)
         if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+          config.headers.Authorization = `Bearer ${token}`; // Adiciona o token no cabeçalho
         }
         return config;
       },
@@ -35,12 +37,7 @@ class ApiClient {
   // Métodos para as requisições
   async get(url) {
     try {
-      const response = await this.api.get(url, {
-        headers: {
-          'Accept': 'application/json', // Adicionando header de Aceitação
-        },
-      });
-
+      const response = await this.api.get(url);
       return response.data;
     } catch (error) {
       this.handleError(error);
@@ -49,11 +46,7 @@ class ApiClient {
 
   async post(url, data, msg) {
     try {
-      const response = await this.api.post(url, data, {
-        headers: {
-          'Content-Type': 'application/json', // Confirmando o tipo de conteúdo JSON
-        },
-      });
+      const response = await this.api.post(url, data);
       this.toast.success(msg || 'Dados enviados com sucesso!');
       return response.data;
     } catch (error) {
@@ -84,7 +77,7 @@ class ApiClient {
         },
       });
 
-      this.toast.success('Dados enviados com sucesso!');
+      this.toast.success('Dados atualizados com sucesso!');
       return response.data;
     } catch (error) {
       this.handleError(error);
@@ -107,11 +100,7 @@ class ApiClient {
 
   async delete(url) {
     try {
-      const response = await this.api.delete(url, {
-        headers: {
-          'Accept': 'application/json', // Adicionando header de Aceitação
-        },
-      });
+      const response = await this.api.delete(url);
       this.toast.success('Item excluído com sucesso!');
       return response.data;
     } catch (error) {
@@ -121,11 +110,7 @@ class ApiClient {
 
   async register(data) {
     try {
-      await this.api.post('/api/auth/signup', data, {
-        headers: {
-          'Content-Type': 'application/json', // Confirmando o tipo de conteúdo JSON
-        },
-      });
+      await this.api.post('/api/auth/signup', data);
       this.toast.success('Cadastrado com Sucesso!');
     } catch (error) {
       this.toast.error(error.message);
@@ -135,11 +120,7 @@ class ApiClient {
 
   async login(data) {
     try {
-      const response = await this.api.post('/api/auth/signin', data, {
-        headers: {
-          'Content-Type': 'application/json', // Confirmando o tipo de conteúdo JSON
-        },
-      });
+      const response = await this.api.post('/api/auth/signin', data);
       this.toast.success('Logado com Sucesso!');
       return response.data;
     } catch (error) {
