@@ -85,6 +85,17 @@ export default {
     };
   },
  async mounted() {
+  const keysToRemove = [
+            'accessToken',
+            'username',
+            'userId',
+            'roles',
+            'uuid',
+            'wedding_data_id'
+        ];
+
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        
   await  this.fetchWeddingData();
   },
   methods: {
