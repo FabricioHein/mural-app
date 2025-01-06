@@ -12,6 +12,12 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @RestController
 @CrossOrigin(
@@ -23,7 +29,7 @@ import java.nio.file.Paths;
 )
 public class FileController {
 
-    private static final String UPLOAD_DIR = "uploads";  // Caminho relativo é mais seguro
+    private static final String UPLOAD_DIR = "uploads";  // Caminho relativo
 
     /**
      * Método para servir arquivos da pasta de uploads.
@@ -43,33 +49,35 @@ public class FileController {
 
             // Verifica se o arquivo está dentro do diretório de uploads (segurança)
             if (!filePath.toAbsolutePath().startsWith(uploadPath)) {
-                throw new SecurityException("Acesso negado ao arquivo: " + fileName);
+                return ResponseEntity.status(403).body(null);  // Acesso negado ao arquivo
             }
 
             Resource resource = new UrlResource(filePath.toUri());
 
+            // Verifica se o arquivo não existe ou não pode ser lido
             if (!resource.exists() || !resource.isReadable()) {
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.status(404).build();  // Arquivo não encontrado
             }
 
             // Detecta o tipo de conteúdo do arquivo
             String contentType = Files.probeContentType(filePath);
             if (contentType == null) {
-                contentType = "application/octet-stream";
+                contentType = "application/octet-stream"; // Tipo padrão
             }
 
-            // Configura os headers para download
+            // Retorna o arquivo com os headers apropriados
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
                     .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
                     .body(resource);
 
         } catch (MalformedURLException e) {
-            throw new RuntimeException("Erro ao carregar o arquivo: " + fileName, e);
+            return ResponseEntity.status(500).body(null);  // Erro ao carregar o arquivo
         } catch (IOException e) {
-            throw new RuntimeException("Erro ao processar o arquivo: " + fileName, e);
+            return ResponseEntity.status(500).body(null);  // Erro ao processar o arquivo
         } catch (SecurityException e) {
-            throw new RuntimeException("Erro de segurança: " + e.getMessage(), e);
+            return ResponseEntity.status(403).body(null);  // Erro de segurança (acesso negado)
         }
     }
 }
+
