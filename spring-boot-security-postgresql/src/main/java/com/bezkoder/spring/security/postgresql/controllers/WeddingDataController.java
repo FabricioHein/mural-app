@@ -33,7 +33,7 @@ public class WeddingDataController {
 
             // Adiciona o prefixo ao imageUrl
             if (weddingData.getImageUrl() != null) {
-                String baseUrl = "http://localhost:3000/uploads/";
+                String baseUrl = "https://mural-app.onrender.com/uploads/uploads/";
                 weddingData.setImageUrl(baseUrl + weddingData.getImageUrl());
             }
 
