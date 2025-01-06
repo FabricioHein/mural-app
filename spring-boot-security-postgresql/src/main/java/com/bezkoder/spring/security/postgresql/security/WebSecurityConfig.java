@@ -67,7 +67,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
   @Bean
   public UrlBasedCorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOriginPatterns(Arrays.asList("https://muralnoivos.web.app", "https://*.web.app")); // Padrão para origens
+    configuration.setAllowedOriginPatterns(Arrays.asList("*")); // Padrão para origens
     configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
     configuration.setAllowCredentials(true); // Habilita envio de credenciais (cookies/tokens)

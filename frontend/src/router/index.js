@@ -50,7 +50,7 @@ const routes = [
     meta: { requiresAuth: true }, // Protege a rota
   },
   {
-    path: '/casamento?uuid=:uuid',
+    path: '/casamento',
     name: 'casamento',
     props: (route) => ({
       uuid: route.query.uuid,

@@ -12,24 +12,18 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMethod;
-
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @RestController
 @CrossOrigin(
-        origins = "https://muralnoivos.web.app",
+        origins = "*",
         allowedHeaders = {"Authorization", "Content-Type", "Accept"},
         methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS},
-        allowCredentials = "true",
+        allowCredentials = "false",
         maxAge = 3600
 )
 public class FileController {
 
-    private static final String UPLOAD_DIR = "uploads";  // Caminho relativo
+    private static final String UPLOAD_DIR = "uploads";  // Caminho relativo é mais seguro
 
     /**
      * Método para servir arquivos da pasta de uploads.
@@ -49,35 +43,33 @@ public class FileController {
 
             // Verifica se o arquivo está dentro do diretório de uploads (segurança)
             if (!filePath.toAbsolutePath().startsWith(uploadPath)) {
-                return ResponseEntity.status(403).body(null);  // Acesso negado ao arquivo
+                throw new SecurityException("Acesso negado ao arquivo: " + fileName);
             }
 
             Resource resource = new UrlResource(filePath.toUri());
 
-            // Verifica se o arquivo não existe ou não pode ser lido
             if (!resource.exists() || !resource.isReadable()) {
-                return ResponseEntity.status(404).build();  // Arquivo não encontrado
+                return ResponseEntity.notFound().build();
             }
 
             // Detecta o tipo de conteúdo do arquivo
             String contentType = Files.probeContentType(filePath);
             if (contentType == null) {
-                contentType = "application/octet-stream"; // Tipo padrão
+                contentType = "application/octet-stream";
             }
 
-            // Retorna o arquivo com os headers apropriados
+            // Configura os headers para download
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
                     .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
                     .body(resource);
 
         } catch (MalformedURLException e) {
-            return ResponseEntity.status(500).body(null);  // Erro ao carregar o arquivo
+            throw new RuntimeException("Erro ao carregar o arquivo: " + fileName, e);
         } catch (IOException e) {
-            return ResponseEntity.status(500).body(null);  // Erro ao processar o arquivo
+            throw new RuntimeException("Erro ao processar o arquivo: " + fileName, e);
         } catch (SecurityException e) {
-            return ResponseEntity.status(403).body(null);  // Erro de segurança (acesso negado)
+            throw new RuntimeException("Erro de segurança: " + e.getMessage(), e);
         }
     }
 }
-

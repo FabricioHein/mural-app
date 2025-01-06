@@ -32,10 +32,10 @@ import com.bezkoder.spring.security.postgresql.security.jwt.JwtUtils;
 import com.bezkoder.spring.security.postgresql.security.services.UserDetailsImpl;
 
 @CrossOrigin(
-        origins = "https://muralnoivos.web.app",
+        origins = "*",
         allowedHeaders = {"Authorization", "Content-Type", "Accept"},
         methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS},
-        allowCredentials = "true",
+        allowCredentials = "false",
         maxAge = 3600
 )
 @RestController

@@ -20,10 +20,10 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/posts")
 @CrossOrigin(
-        origins = "https://muralnoivos.web.app",
+        origins = "*",
         allowedHeaders = {"Authorization", "Content-Type", "Accept"},
         methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS},
-        allowCredentials = "true",
+        allowCredentials = "false",
         maxAge = 3600
 )
 
