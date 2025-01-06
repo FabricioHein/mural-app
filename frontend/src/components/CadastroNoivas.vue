@@ -10,10 +10,17 @@
 
     <form @submit.prevent="handleSubmit" class="box">
       <div class="field">
-        <label class="label" for="username">Nome</label>
+        <div class="field">
+        <label class="label" for="name">Nome</label>
+        <div class="control">
+          <input class="input" type="text" id="username" v-model="formData.name" required
+            placeholder="Digite o nome do convidado" />
+        </div>
+      </div>
+        <label class="label" for="username">Usuário</label>
         <div class="control">
           <input class="input" type="text" id="username" v-model="formData.username" required
-            placeholder="Digite o nome do convidado" />
+            placeholder="Digite um usuário" />
         </div>
       </div>
 
@@ -64,6 +71,7 @@ export default {
     return {
       data: {},
       formData: {
+        name: '',
         username: '',
         email: '',
         password: '',

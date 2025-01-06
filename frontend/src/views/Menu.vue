@@ -1,15 +1,24 @@
 <template>
   <div v-if="load">
-    <!-- Header fixo -->
+
+    <!-- Navbar fixa -->
     <nav class="navbar is-fixed-top has-shadow" role="navigation" aria-label="main navigation">
       <div class="navbar-brand">
         <div class="navbar-item is-size-4 has-text-weight-bold is-flex is-justify-content-center is-flex-grow-1">
           💍 Mural dos Noivos 💍
         </div>
+        <a href="#" @click="logout()"
+          class="navbar-item is-size-6 has-text-weight-bold is-flex is-justify-content-right is-flex-grow-1">
+          <span class="icon is-small">
+            <i class="fas fa-sign-out-alt"></i> <!-- Ícone de sair -->
+          </span>
+          <span class="ml-2">Sair</span> <!-- Texto "Sair" -->
+        </a>
       </div>
+
     </nav>
 
-    <!-- Container principal -->
+    <!-- Main content (restante da página) -->
     <div class="container mt-6 pt-6">
       <!-- Menu principal -->
       <div v-if="currentView === 'menu'" class="section">
@@ -78,6 +87,8 @@
 
 
     </div>
+
+
   </div>
 </template>
 <script>
@@ -106,6 +117,17 @@ export default {
     };
   },
   methods: {
+    logout() {
+      this.toast.error('Você foi desconectado. A página será recarregada.');
+      localStorage.removeItem('accessToken');
+        localStorage.removeItem('username');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('roles');
+        localStorage.removeItem('uuid');
+        localStorage.removeItem('wedding_data_id');
+      window.location.reload(); // Atualiza a página
+
+    },
     async shareWeddingLink() {
       const url = `${window.location.origin}/casamento?uuid=${this.weddingData.uuid}`;
       try {
@@ -191,7 +213,22 @@ export default {
       }
     },
     async fetchWeddingData() {
-      const uuid = this.$route.query.uuid;
+      let uuid = this.$route.query.uuid;
+      let getUUIDStore = localStorage.getItem('uuid');
+
+      if (getUUIDStore) {
+        try {
+          const apiClient = new ApiClient();
+
+          const response = await apiClient.get(`/api/wedding-data/uuid/${getUUIDStore}`);
+
+          Object.assign(this.weddingData, response);
+          this.load = true;
+
+        } catch (error) {
+          console.error('Erro ao buscar dados do casamento:', error);
+        }
+      }
 
       if (uuid == 'noivos' && uuid) {
         this.load = true;

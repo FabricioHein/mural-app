@@ -12,8 +12,15 @@
       <div class="field">
         <label class="label" for="username">Nome</label>
         <div class="control">
-          <input class="input" type="text" id="username" v-model="formData.username" required
+          <input class="input" type="text" id="username" v-model="formData.name" required
             placeholder="Digite o nome do convidado" />
+        </div>
+      </div>
+      <div class="field">
+        <label class="label" for="username">Usuário</label>
+        <div class="control">
+          <input class="input" type="text" id="username" v-model="formData.username" required
+          placeholder="Digite um usuário" />
         </div>
       </div>
 
@@ -121,6 +128,7 @@ export default {
     },
     resetForm() {
       this.formData = {
+        name: '',
         username: '',
         email: '',
         password: '',

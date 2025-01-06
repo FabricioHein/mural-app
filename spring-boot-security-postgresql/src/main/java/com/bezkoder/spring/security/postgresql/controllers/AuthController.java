@@ -63,7 +63,28 @@ public class AuthController {
   @PostMapping("/signin")
   public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
     try {
-      // Autenticar usuário com email e senha
+
+      String identifier = loginRequest.getUsername();
+      Optional<User> userOptional;
+
+      if (identifier.contains("@")) {
+        // Se o identificador contiver "@", trata-se de um email
+        userOptional = userRepository.findByEmail(identifier);
+        if (userOptional.isEmpty()) {
+          return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                  .body(Collections.singletonMap("message", "Error: Não encontrado usuário com esse email: " + identifier));
+        }
+      } else {
+        // Se não for um email, assume-se que é um username
+        userOptional = userRepository.findByUsername(identifier);
+        if (userOptional.isEmpty()) {
+          return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                  .body(Collections.singletonMap("message", "Error: Não encontrado usuário com esse username: " + identifier));
+        }
+      }
+
+      loginRequest.setUsername(userOptional.get().getUsername());
+
       Authentication authentication = authenticationManager.authenticate(
               new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
@@ -115,7 +136,7 @@ public class AuthController {
       }
 
       // Criar a conta do novo usuário
-      User user = new User(signUpRequest.getUsername(), signUpRequest.getEmail(),
+      User user = new User(signUpRequest.getName(), signUpRequest.getUsername(), signUpRequest.getEmail(),
               encoder.encode(signUpRequest.getPassword()));
 
       Set<String> strRoles = signUpRequest.getRole();

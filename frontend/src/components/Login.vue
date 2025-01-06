@@ -3,7 +3,7 @@
     <h2 class="title has-text-centered">Login</h2>
     <form @submit.prevent="handleSubmit" class="box">
       <div class="field">
-        <label class="label" for="username">username</label>
+        <label class="label" for="username">Email ou Usuário</label>
         <div class="control">
           <input class="input" type="text" id="username" v-model="formData.username" required
             placeholder="Digite o seu username" />

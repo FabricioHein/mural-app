@@ -22,6 +22,10 @@ public class User {
   private Long id;
 
   @NotBlank
+  @Size(max = 50)
+  private String name;
+
+  @NotBlank
   @Size(max = 20)
   private String username;
 
@@ -49,7 +53,8 @@ public class User {
   public User() {
   }
 
-  public User(String username, String email, String password) {
+  public User(String name, String username, String email, String password) {
+    this.name = name;
     this.username = username;
     this.email = email;
     this.password = password;
@@ -102,4 +107,12 @@ public class User {
   public void setWeddingData(Set<WeddingData> weddingData) {
     this.weddingData = weddingData;
   }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

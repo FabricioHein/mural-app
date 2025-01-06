@@ -5,7 +5,7 @@ class ApiClient {
   constructor() {
     this.toast = useToast();
     this.api = axios.create({
-      baseURL: 'https://mural-app.onrender.com', // Base URL da sua API
+      baseURL: 'https://mural-app.onrender.com', // Base URL
       headers: {
         'Content-Type': 'application/json', // Tipo de conteúdo JSON
         'Accept': 'application/json', // Aceitar respostas JSON
@@ -136,7 +136,16 @@ class ApiClient {
       }
 
       if (error.response.status === 401 && !error.response.data.message) {
+
         localStorage.removeItem('accessToken');
+        localStorage.removeItem('username');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('roles');
+        localStorage.removeItem('uuid');
+        localStorage.removeItem('wedding_data_id');
+           // Remove o token e atualiza a página
+        this.toast.error('Sessão expirada. Faça login novamente.');
+        window.location.reload(); // Atualiza a página
         this.toast.error('Error no acesso, tente novamente.');
         return; // Evita lançar o erro novamente após o tratamento
       }
