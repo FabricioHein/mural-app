@@ -73,7 +73,7 @@
         <div class="field">
           <div class="field is-grouped is-grouped-right">
             <div class="control">
-              <button @click="back()" class="button is-alert"> Voltar</button>
+              <button @click="back()" class="button is-alert" v-if="this.weddingData.uuid"> Voltar</button>
 
             </div>
             <button class="button is-primary" @click="submitForm">Enviar</button>
