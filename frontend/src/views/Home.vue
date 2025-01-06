@@ -144,7 +144,15 @@
 
 <script>
 export default {
-    name: 'MuralDosNoivos'
+    name: 'MuralDosNoivos', 
+    mounted(){
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('username');
+        localStorage.removeItem('userId');
+        localStorage.removeItem('roles');
+        localStorage.removeItem('uuid');
+        localStorage.removeItem('wedding_data_id');
+    }
 };
 </script>
 
