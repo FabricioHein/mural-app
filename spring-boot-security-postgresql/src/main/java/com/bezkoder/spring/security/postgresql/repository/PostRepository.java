@@ -11,8 +11,7 @@ import java.util.List;
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     // Consulta SQL nativa para buscar posts por weddingDataId
-    @Query(value = "SELECT * FROM post WHERE wedding_data_id = :weddingDataId", nativeQuery = true)
+    @Query(value = "SELECT * FROM post WHERE wedding_data_id = :weddingDataId ORDER BY post.id DESC", nativeQuery = true)
     List<Post> findByWeddingDataId(Long weddingDataId);
-
 
 }

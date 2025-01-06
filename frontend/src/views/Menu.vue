@@ -15,7 +15,8 @@
       <div v-if="currentView === 'menu'" class="section">
         <div class="buttons is-flex is-flex-direction-column">
 
-          <button class="button is-info is-fullwidth is-medium" @click="shareWeddingLink" v-if="this.weddingData.uuid && role == 'ROLE_MODERATOR'">
+          <button class="button is-info is-fullwidth is-medium" @click="shareWeddingLink"
+            v-if="this.weddingData.uuid && role == 'ROLE_MODERATOR'">
             <span class="icon">🔗</span>
             <span>Compartilhar Link</span>
           </button>
@@ -59,12 +60,15 @@
           <div class="field is-grouped is-grouped-right">
 
             <p class="control">
-              <button class="button is-alert" @click="changeView('menu')">
+
+              <button class="button btn-secondary" v-if="this.weddingData.uuid" @click="changeView('menu')">
+                <span class="btn-icon">←</span>
                 Voltar
               </button>
             </p>
             <p class="control">
-              <button class="button is-primary" @click="sendPost">
+              <button @click="sendPost" class="button btn-success">
+                <span class="btn-icon">✓</span>
                 Enviar
               </button>
             </p>

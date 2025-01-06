@@ -1,33 +1,58 @@
 <template>
   <div class="app" v-if="load">
-    <!-- Vídeo em tela cheia com altura de 80% -->
-    <video ref="video" autoplay></video>
+    <div class="camera-container" v-if="!isCaptured">
+      <!-- Video preview -->
+      <video ref="video" autoplay class="camera-preview"></video>
 
-    <!-- Contador de tempo (apenas para vídeo) -->
-    <div v-if="isRecording" class="countdown">{{ countdown }}</div>
-
-    <!-- Exibição de Foto ou Vídeo Capturado -->
-    <div v-if="isCaptured" class="captured-media">
-      <img v-if="isPhoto" :src="photo" alt="Captured Photo" />
-      <video v-if="isVideo" controls :src="videoSrc" />
+      <!-- Countdown overlay -->
+      <div v-if="isRecording" class="countdown">{{ countdown }}</div>
     </div>
 
-    <!-- Container para botões de ações -->
+    <!-- Captured media preview -->
+    <div v-if="isCaptured" class="captured-media">
+      <img v-if="isPhoto" :src="photo" alt="Captured Photo" class="captured-content" />
+      <video v-if="isVideo" controls :src="videoSrc" class="captured-content"></video>
+    </div>
+
+    <!-- Action buttons -->
     <div class="action-buttons">
       <div v-if="!isCaptured" class="controls">
-        <button @click="back()" class="capture-button-alert"> Voltar</button>
-        <button @click="startCapture('photo')" class="capture-button">📸 Tirar Foto</button>
-        <button @click="startCapture('video')" class="capture-button">🎥 Gravar Vídeo</button>
+        <button @click="back()" class="btn btn-secondary">
+          <span class="btn-icon">←</span>
+          Voltar
+        </button>
+        <button @click="startCapture('photo')" class="btn btn-primary">
+          <span class="btn-icon">📸</span>
+          Tirar Foto
+        </button>
+        <button @click="startCapture('video')" class="btn btn-primary">
+          <span class="btn-icon">🎥</span>
+          Gravar Vídeo
+        </button>
+        <button @click="toggleCamera()" class="btn btn-secondary">
+          <span class="btn-icon">🔄</span>
+          Alternar Câmera
+        </button>
       </div>
 
       <div v-if="isCaptured" class="controls">
-        <button @click="back()" class="capture-button-alert"> Voltar</button>
-        <button @click="resetCapture" class="capture-button">📸 Tentar Novamente</button>
-        <button @click="sendCapture" class="capture-button">🎥 Enviar</button>
+        <button @click="back()" class="btn btn-secondary">
+          <span class="btn-icon">←</span>
+          Voltar
+        </button>
+        <button @click="resetCapture" class="btn btn-primary">
+          <span class="btn-icon">📸</span>
+          Tentar Novamente
+        </button>
+        <button @click="sendCapture" class="btn btn-success">
+          <span class="btn-icon">✓</span>
+          Enviar
+        </button>
       </div>
     </div>
   </div>
 </template>
+
 <script>
 import ApiClient from '@/service/api';
 
@@ -49,6 +74,7 @@ export default {
       videoSrc: null, // URL do vídeo gravado
       mediaStream: null, // Para armazenar o stream da câmera
       videoBlob: null, // Blob do vídeo gravado
+      usingFrontCamera: true, // Define a câmera utilizada
     };
   },
   methods: {
@@ -75,17 +101,15 @@ export default {
       }
 
       try {
-          const apiClient = new ApiClient();
+        const apiClient = new ApiClient();
+        const response = await apiClient.get(`/api/wedding-data/uuid/${uuid}`);
 
-          const response = await apiClient.get(`/api/wedding-data/uuid/${uuid}`);
+        Object.assign(this.weddingData, response);
+        this.load = true;
 
-          Object.assign(this.weddingData, response);
-          this.load = true;
-
-        } catch (error) {
-          console.error('Erro ao buscar dados do casamento:', error);
-        }
-
+      } catch (error) {
+        console.error('Erro ao buscar dados do casamento:', error);
+      }
     },
     async capturePhoto() {
       const videoElement = this.$refs.video;
@@ -145,7 +169,6 @@ export default {
       }, 5000); // Captura por 5 segundos
     },
 
-
     stopCamera() {
       if (this.mediaStream) {
         const tracks = this.mediaStream.getTracks();
@@ -154,16 +177,40 @@ export default {
       this.$refs.video.srcObject = null; // Desconectar a câmera
     },
 
-    async getMediaStream() {
+    async getMediaStream(facingMode = "user") {
       try {
+        // Solicita acesso à câmera e ao microfone
         this.mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: true, // Capturar também o áudio
+          video: { facingMode }, // "user" para câmera frontal, "environment" para traseira
+          audio: true, // Inclui áudio
         });
-        this.$refs.video.srcObject = this.mediaStream;
+
+        // Aguarda o DOM estar atualizado antes de acessar o elemento
+        this.$nextTick(() => {
+          const videoElement = this.$refs.video;
+          if (videoElement) {
+            videoElement.srcObject = this.mediaStream; // Atribui o stream à tag <video>
+          } else {
+            console.error("Elemento <video> não encontrado no DOM.");
+          }
+        });
       } catch (error) {
-        console.error("Error accessing media devices.", error);
+        console.error("Erro ao acessar os dispositivos de mídia:", error);
+
+        // Mostra uma mensagem de erro ao usuário, se necessário
+        alert("Não foi possível acessar a câmera e o microfone. Verifique as permissões.");
       }
+    },
+
+    async toggleCamera() {
+      const currentFacingMode = this.mediaStream.getVideoTracks()[0].getSettings().facingMode;
+      const newFacingMode = currentFacingMode === "user" ? "environment" : "user";
+
+      // Para a câmera atual
+      this.mediaStream.getTracks().forEach((track) => track.stop());
+
+      // Obtém a nova câmera
+      await this.getMediaStream(newFacingMode);
     },
 
     resetCapture() {
@@ -173,7 +220,8 @@ export default {
       this.photo = null;
       this.videoSrc = null;
       this.videoBlob = null; // Limpa o blob armazenado
-      this.getMediaStream(); // Reiniciar a câmera
+      const facingMode = this.usingFrontCamera ? "user" : "environment";
+      this.getMediaStream(facingMode); // Reiniciar a câmera
     },
 
     async sendCapture() {
@@ -205,7 +253,11 @@ export default {
         this.sendPost(formData);
       }
     },
-
+    handleVisibilityChange() {
+      if (document.visibilityState === 'hidden') {
+        this.stopCamera();
+      }
+    },
     async sendPost(formData) {
       try {
         const apiClient = new ApiClient();
@@ -214,7 +266,7 @@ export default {
         this.$router.push({
           name: 'mural',
           query: {
-            uuid:  this.weddingData.uuid
+            uuid: this.weddingData.uuid
           }
         });
       } catch (error) {
@@ -238,7 +290,13 @@ export default {
     await this.fetchWeddingData();
     this.getMediaStream();
 
+    document.addEventListener('visibilitychange', this.handleVisibilityChange);
   },
+  beforeDestroy() {
+    this.stopCamera();
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+  }
+
 };
 </script>
 
@@ -247,132 +305,141 @@ export default {
 .app {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  height: 100vh;
-  background-color: #f9f9f9;
-  /* Cor suave de fundo para casamento */
-  color: #333;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  padding: 20px;
   position: relative;
-  overflow: hidden;
 }
 
-video {
+.camera-container {
   width: 100%;
-  height: 80%;
-  /* Alterado para altura de 80% */
+  max-width: 800px;
+  height: 70vh;
+  position: relative;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  background-color: #000;
+}
+
+.camera-preview {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  position: absolute;
-  top: 0;
-  left: 0;
-  border-radius: 10px;
-  /* Bordas arredondadas */
+  display: block;
 }
 
 .countdown {
-  font-size: 60px;
-  color: #c991a4;
-  /* Cor suave e chamativa para o contador */
   position: absolute;
-  top: 20px;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
+  font-size: 72px;
+  color: #ffffff;
   font-weight: bold;
-  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+}
+
+.captured-media {
+  width: 100%;
+  max-width: 800px;
+  margin: 20px auto;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.captured-content {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 16px;
+}
+
+.action-buttons {
+  width: 100%;
+  max-width: 800px;
+  margin-top: 20px;
+  padding: 16px;
 }
 
 .controls {
   display: flex;
   justify-content: center;
-  gap: 20px;
-  padding-bottom: 10px;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-.capture-button {
-  padding: 12px 30px;
-  font-size: 20px;
-  background-color: #c991a4;
-  /* Cor delicada e elegante para casamento */
-  color: white;
-  border: none;
-  border-radius: 50px;
-  /* Botões arredondados */
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s ease;
-}
-.capture-button-alert {
-  padding: 12px 30px;
-  font-size: 20px;
-  background-color: #e24949a3;
-  /* Cor delicada e elegante para casamento */
-  color: white;
-  border: none;
-  border-radius: 50px;
-  /* Botões arredondados */
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s ease;
-}
-
-.capture-button:hover {
-  background-color: #c991a4;
-  /* Cor mais escura ao passar o mouse */
-  transform: translateY(-5px);
-  /* Efeito de "flutuar" */
-}
-
-.capture-button:active {
-  background-color: #c991a4;
-  /* Cor ainda mais escura quando pressionado */
-  transform: translateY(0);
-}
-
-.captured-media {
-  margin-top: 20px;
-  text-align: center;
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-  margin-top: 20px;
-  border-radius: 10px;
-  /* Bordas arredondadas para a imagem */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  /* Sombra suave para destacar */
-}
-
-video {
-  width: 100%;
-  margin-top: 20px;
-  margin-right: 5px;
-  margin-bottom: 5px;
-  border-radius: 10px;
-  /* Bordas arredondadas para o vídeo */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  /* Sombra suave para destacar */
-}
-
-.action-buttons {
-  width: 100%;
+.btn {
   display: flex;
+  align-items: center;
   justify-content: center;
-  gap: 20px;
-  position: absolute;
-  bottom: 0;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 160px;
+}
+
+.btn-icon {
+  font-size: 20px;
+}
+
+.btn-primary {
+  background-color: #c991a4;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #b67d91;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: #e24949;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #c93e3e;
+  transform: translateY(-2px);
+}
+
+.btn-success {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.btn-success:hover {
+  background-color: #3d8b40;
+  transform: translateY(-2px);
 }
 
 @media (max-width: 768px) {
-  .controls {
-    width: 90%;
+  .camera-container {
+    height: 60vh;
   }
 
-  .capture-button {
-    font-size: 18px;
-    padding: 10px 25px;
+  .btn {
+    padding: 10px 20px;
+    min-width: 140px;
+    font-size: 14px;
   }
 
   .countdown {
     font-size: 48px;
+  }
+
+  .controls {
+    gap: 12px;
   }
 }
 </style>

@@ -27,9 +27,7 @@ export default {
           const apiClient = new ApiClient();
 
         const response = await apiClient.get(`/api/posts/${this.weddingData.id}`);
-
-
-        this.posts = response;
+        this.posts = response.sort((a, b) => b.id - a.id); // Ordena por id decrescente
 
             // Transformar reações no formato correto
             this.posts.forEach((post) => {
@@ -77,7 +75,7 @@ export default {
         const apiClient = new ApiClient();
         const response = await apiClient.post(`/api/posts/${post.id}/reactions`, {
           reaction,
-        });
+        }, `${reaction} +`);
         post.reactions[reaction] = response.data.reactionCount;
       } catch (error) {
         console.error('Erro ao adicionar reação:', error);
@@ -154,7 +152,10 @@ export default {
     </div>
     <div class="field is-grouped is-grouped-left p-2">
         <div class="control">
-          <button @click="back()" class="button is-alert" >Voltar</button>
+          <button @click="back()" class="button btn-secondary">
+          <span class="btn-icon">←</span>
+          Voltar
+        </button>
         </div>
     </div>
   </div>
