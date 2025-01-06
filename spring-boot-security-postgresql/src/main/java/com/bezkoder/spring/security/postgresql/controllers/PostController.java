@@ -54,7 +54,7 @@ public class PostController {
         return new PostDTO(
                 post.getId(),
                 post.getContent(),
-              "http://localhost:3000/uploads/" + post.getMediaUrl(),
+              "https://mural-app.onrender.com/uploads/" + post.getMediaUrl(),
                 post.getReactions(),
                 post.getUser()
         );
