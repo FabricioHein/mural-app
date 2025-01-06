@@ -146,12 +146,16 @@
 export default {
     name: 'MuralDosNoivos', 
     mounted(){
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('username');
-        localStorage.removeItem('userId');
-        localStorage.removeItem('roles');
-        localStorage.removeItem('uuid');
-        localStorage.removeItem('wedding_data_id');
+        const keysToRemove = [
+            'accessToken',
+            'username',
+            'userId',
+            'roles',
+            'uuid',
+            'wedding_data_id'
+        ];
+
+        keysToRemove.forEach(key => localStorage.removeItem(key));
     }
 };
 </script>
