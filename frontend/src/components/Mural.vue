@@ -1,121 +1,3 @@
-<script>
-import ApiClient from '@/service/api';
-import { reactive } from 'vue';
-
-export default {
-  data() {
-    return {
-      posts: [],
-      load: false,
-      weddingData: {
-        uuid: null,
-        id: null
-      },
-    };
-  },
-  methods: {
-    back() {
-      this.$router.push({
-          name: 'Menu',
-          query: {
-            uuid: this.weddingData.uuid
-          }
-        });
-    },
-    async fetchPosts() {
-      try {
-          const apiClient = new ApiClient();
-
-        const response = await apiClient.get(`/api/posts/${this.weddingData.id}`);
-        this.posts = response.sort((a, b) => b.id - a.id); // Ordena por id decrescente
-
-            // Transformar reações no formato correto
-            this.posts.forEach((post) => {
-              if (post.reactions) {
-                const transformedReactions = {};
-                Object.keys(post.reactions).forEach((key) => {
-                  try {
-                    // Parse a chave JSON para obter a reação real
-                    const parsedKey = JSON.parse(key).reaction;
-                    transformedReactions[parsedKey] = post.reactions[key];
-                  } catch (error) {
-                    console.error('Erro ao parsear chave de reação:', key, error);
-                  }
-                });
-                post.reactions = reactive(transformedReactions);
-              } else {
-                // Inicializa as reações padrão caso não existam
-                post.reactions = reactive({
-                  '👍': 0,
-                  '😍': 0,
-                  '❤️': 0,
-                  '😂': 0,
-                  '🎉': 0
-                });
-              }
-            });
-
-
-        } catch (error) {
-          console.error('Erro ao carregar os posts:', error);
-        }
-    },
-    async addReaction(post, reaction) {
-      if (!post.reactions) {
-        post.reactions = reactive({});
-      }
-
-      if (!post.reactions[reaction]) {
-        post.reactions[reaction] = 0;
-      }
-
-      post.reactions[reaction]++;
-
-      try {
-        const apiClient = new ApiClient();
-        const response = await apiClient.post(`/api/posts/${post.id}/reactions`, {
-          reaction,
-        }, `${reaction} +`);
-        post.reactions[reaction] = response.data.reactionCount;
-      } catch (error) {
-        console.error('Erro ao adicionar reação:', error);
-      }
-    },
-    isImage(file) {
-      return typeof file === 'string' && /\.(jpeg|jpg|gif|png)$/i.test(file);
-    },
-    isVideo(file) {
-      return typeof file === 'string' && /\.(mp4|webm|ogg)$/i.test(file);
-    },
-    async fetchWeddingData() {
-      const uuid = this.$route.query.uuid;
-      if (!uuid) {
-        console.error('UUID não encontrado na query string.');
-        return;
-      }
-
-      try {
-          const apiClient = new ApiClient();
-
-          const response = await apiClient.get(`/api/wedding-data/uuid/${uuid}`);
-
-          Object.assign(this.weddingData, response);
-          this.load = true;
-
-        } catch (error) {
-          console.error('Erro ao buscar dados do casamento:', error);
-        }
-
-     
-    }
-  },
-  async mounted() {
-  await  this.fetchWeddingData();
-  this.fetchPosts();
-
-  },
-};
-</script>
 <template>
   <div class="mural" v-if="load">
 
@@ -123,13 +5,14 @@ export default {
       <div v-for="post in posts" :key="post.id" class="post">
         <!-- Cabeçalho do post -->
         <div class="post-header">
-          <b>{{ post.user.username }}</b>
+          <b>{{ post.user.name ? post.user.name : post.user.username }}</b>
         </div>
 
         <!-- Mídia do post -->
         <div class="post-media">
           <img v-if="isImage(post.mediaUrl)" :src="post.mediaUrl" alt="Imagem enviada">
           <video v-if="isVideo(post.mediaUrl)" controls :src="post.mediaUrl"></video>
+
         </div>
 
         <!-- Conteúdo do post -->
@@ -144,6 +27,14 @@ export default {
           <span class="reaction heart" @click="addReaction(post, '❤️')">❤️ {{ post.reactions['❤️'] || 0 }}</span>
           <span class="reaction laugh" @click="addReaction(post, '😂')">😂 {{ post.reactions['😂'] || 0 }}</span>
           <span class="reaction party" @click="addReaction(post, '🎉')">🎉 {{ post.reactions['🎉'] || 0 }}</span>
+          <a v-if="post.mediaUrl && role === 'ROLE_MODERATOR'" @click="downloadFile(post.mediaUrl)"
+            class="download-button">
+            Baixar Arquivo
+          </a>
+          <a v-if="post.mediaUrl && role == 'ROLE_MODERATOR'" class="delet-button"
+            @click="deletePost(post)">
+            Deletar
+          </a>
         </div>
       </div>
     </div>
@@ -151,17 +42,51 @@ export default {
       <p>Ainda não há mensagens no mural.</p>
     </div>
     <div class="field is-grouped is-grouped-left p-2">
-        <div class="control">
-          <button @click="back()" class="button btn-secondary">
+      <div class="control">
+        <button @click="back()" class="button btn-secondary">
           <span class="btn-icon">←</span>
           Voltar
         </button>
-        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.download-button {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #ffb6c1;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.delet-button {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #bfbdba;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.download-button:hover {
+  background-color: #d4516f;
+}
+
+.delet-button:hover {
+  background-color: #d49751;
+}
+
 .mural {
   margin: 2rem auto;
   max-width: 600px;
@@ -324,3 +249,149 @@ export default {
   }
 }
 </style>
+<script>
+import ApiClient from '@/service/api';
+import { reactive } from 'vue';
+
+export default {
+  data() {
+    return {
+      posts: [],
+      load: false,
+      weddingData: {
+        uuid: null,
+        id: null
+      },
+      role: null,
+    };
+  },
+  methods: {
+    back() {
+      this.$router.push({
+        name: 'Menu',
+        query: {
+          uuid: this.weddingData.uuid
+        }
+      });
+    },
+    async downloadFile(fileUrl) {
+      try {
+        const response = await fetch(fileUrl);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileUrl.split('/').pop(); // Nome do arquivo com base na URL
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url); // Libera o recurso
+      } catch (error) {
+        console.error('Erro ao baixar o arquivo:', error);
+      }
+    },
+    async fetchPosts() {
+      try {
+        const apiClient = new ApiClient();
+
+        const response = await apiClient.get(`/api/posts/${this.weddingData.id}`);
+        this.posts = response.sort((a, b) => b.id - a.id); // Ordena por id decrescente
+
+        // Transformar reações no formato correto
+        this.posts.forEach((post) => {
+          if (post.reactions) {
+            const transformedReactions = {};
+            Object.keys(post.reactions).forEach((key) => {
+              try {
+                // Parse a chave JSON para obter a reação real
+                const parsedKey = JSON.parse(key).reaction;
+                transformedReactions[parsedKey] = post.reactions[key];
+              } catch (error) {
+                console.error('Erro ao parsear chave de reação:', key, error);
+              }
+            });
+            post.reactions = reactive(transformedReactions);
+          } else {
+            // Inicializa as reações padrão caso não existam
+            post.reactions = reactive({
+              '👍': 0,
+              '😍': 0,
+              '❤️': 0,
+              '😂': 0,
+              '🎉': 0
+            });
+          }
+        });
+
+
+      } catch (error) {
+        console.error('Erro ao carregar os posts:', error);
+      }
+    },
+    async deletePost(post) {
+      try {
+        const apiClient = new ApiClient();
+        await apiClient.delete(`/api/posts/${post.id}`);
+        await this.fetchPosts();
+
+      } catch (error) {
+        console.error('Erro ao adicionar reação:', error);
+      }
+    },
+    async addReaction(post, reaction) {
+      if (!post.reactions) {
+        post.reactions = reactive({});
+      }
+
+      if (!post.reactions[reaction]) {
+        post.reactions[reaction] = 0;
+      }
+
+      post.reactions[reaction]++;
+
+      try {
+        const apiClient = new ApiClient();
+        const response = await apiClient.post(`/api/posts/${post.id}/reactions`, {
+          reaction,
+        }, `${reaction} +`);
+        post.reactions[reaction] = response.data.reactionCount;
+      } catch (error) {
+        console.error('Erro ao adicionar reação:', error);
+      }
+    },
+    isImage(file) {
+      return typeof file === 'string' && /\.(jpeg|jpg|gif|png)$/i.test(file);
+    },
+    isVideo(file) {
+      return typeof file === 'string' && /\.(mp4|webm|ogg)$/i.test(file);
+    },
+    async fetchWeddingData() {
+      const uuid = this.$route.query.uuid;
+      if (!uuid) {
+        console.error('UUID não encontrado na query string.');
+        return;
+      }
+
+      try {
+        const apiClient = new ApiClient();
+
+        const response = await apiClient.get(`/api/wedding-data/uuid/${uuid}`);
+
+        Object.assign(this.weddingData, response);
+        this.load = true;
+
+      } catch (error) {
+        console.error('Erro ao buscar dados do casamento:', error);
+      }
+
+
+    }
+  },
+  async mounted() {
+    await this.fetchWeddingData();
+    this.fetchPosts();
+    this.role = localStorage.getItem('roles')
+
+  },
+};
+</script>

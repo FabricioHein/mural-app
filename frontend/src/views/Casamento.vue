@@ -93,6 +93,7 @@ onMounted(() => {
           <h1 class="title is-1 has-text-white has-text-weight-bold wedding-title">
             {{ weddingData.brideAndGroomName }}
           </h1>
+          <h1>{{ new Date(weddingData.weddingDate).toLocaleDateString('pt-BR') }}</h1>  
         </div>
       </div>
     </div>

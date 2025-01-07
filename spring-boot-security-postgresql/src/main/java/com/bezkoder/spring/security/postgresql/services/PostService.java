@@ -9,16 +9,17 @@ import com.bezkoder.spring.security.postgresql.repository.PostRepository;
 import com.bezkoder.spring.security.postgresql.repository.UserRepository;
 import com.bezkoder.spring.security.postgresql.repository.WeddingDataRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.io.File;
-import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -30,6 +31,9 @@ public class PostService {
     @Autowired
     private WeddingDataRepository weddingDataRepository;
 
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/";
 
@@ -50,6 +54,31 @@ public class PostService {
         }
 
         throw new RuntimeException("Post não encontrado");
+    }
+    @Transactional
+    public Map<String, Object> deletPost(Long postId) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // Excluir todas as reações associadas ao post
+            String deleteReactionsQuery = "DELETE FROM post_reactions WHERE post_id = ?";
+            jdbcTemplate.update(deleteReactionsQuery, postId);
+
+            // Excluir o post
+            postRepository.deleteById(postId);
+
+            // Retorna sucesso
+            response.put("success", true);
+            response.put("message", "Post excluído com sucesso.");
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            // Retorna erro
+            response.put("success", false);
+            response.put("message", "Erro ao excluir o post.");
+        }
+
+        return response;
     }
 
     public Post savePostMidia(String content, MultipartFile media, String mediaType, Long userId, Long weddingDataId) throws IOException {

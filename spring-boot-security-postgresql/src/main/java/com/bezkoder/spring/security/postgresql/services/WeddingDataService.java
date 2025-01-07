@@ -45,7 +45,6 @@ public class WeddingDataService {
             String brideAndGroomName,
             LocalDate weddingDate,
             Long userId,
-            String color,
             MultipartFile media
     ) throws IOException {
         try {
@@ -65,7 +64,6 @@ public class WeddingDataService {
 
             // Atualiza os campos do objeto WeddingData
             wedding.setBrideAndGroomName(brideAndGroomName);
-            wedding.setColor(color);
             wedding.setWeddingDate(weddingDate);
 
             if (media != null && !media.isEmpty()) {

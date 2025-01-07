@@ -7,7 +7,6 @@ public interface WeddingProjected {
     Long getId();
     UUID getUuid();
     String getBrideAndGroomName();
-    String getColor();
     String getImageUrl();
     LocalDate getWeddingDate();
 

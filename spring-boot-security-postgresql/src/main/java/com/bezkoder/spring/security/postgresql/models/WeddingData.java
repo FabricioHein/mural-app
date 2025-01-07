@@ -20,7 +20,7 @@ public class WeddingData {
     private String brideAndGroomName;
     private String imageUrl;
     private LocalDate weddingDate;
-    private String color;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference
@@ -87,11 +87,4 @@ public class WeddingData {
         this.user = user;
     }
 
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
 }

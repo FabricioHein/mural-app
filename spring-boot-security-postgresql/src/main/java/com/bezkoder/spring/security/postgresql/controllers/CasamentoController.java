@@ -31,11 +31,10 @@ public class CasamentoController {
             @RequestParam("brideAndGroomName") String brideAndGroomName,
             @RequestParam("weddingDate") LocalDate weddingDate,
             @RequestParam("userId") Long userId,
-            @RequestParam("color") String color,
             @RequestParam(value = "media", required = false) MultipartFile media) throws IOException {
 
         // Chama o serviço para salvar o post com os dados fornecidos
-        WeddingData savedWeddingData = weddingDataService.saveWeddingMidia(mediaType, brideAndGroomName, weddingDate, userId, color, media);
+        WeddingData savedWeddingData = weddingDataService.saveWeddingMidia(mediaType, brideAndGroomName, weddingDate, userId, media);
         return ResponseEntity.ok(savedWeddingData);
     }
 

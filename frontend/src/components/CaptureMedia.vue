@@ -174,7 +174,10 @@ export default {
         const tracks = this.mediaStream.getTracks();
         tracks.forEach((track) => track.stop());
       }
-      this.$refs.video.srcObject = null; // Desconectar a câmera
+      if(this.$refs.video?.srcObject){
+        this.$refs.video.srcObject = null; // Desconectar a câmera
+
+      }
     },
 
     async getMediaStream(facingMode = "user") {
@@ -190,8 +193,6 @@ export default {
           const videoElement = this.$refs.video;
           if (videoElement) {
             videoElement.srcObject = this.mediaStream; // Atribui o stream à tag <video>
-          } else {
-            console.error("Elemento <video> não encontrado no DOM.");
           }
         });
       } catch (error) {

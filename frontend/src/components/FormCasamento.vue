@@ -23,15 +23,6 @@
           <p class="help is-danger" v-if="errors.weddingDate">{{ errors.weddingDate }}</p>
         </div>
 
-        <!-- Cor do Tema -->
-        <div class="field" :class="{ 'is-danger': errors.color }">
-          <label class="label">Cor do Tema</label>
-          <div class="control">
-            <input class="input" type="color" v-model="formData.color" />
-          </div>
-          <p class="help is-danger" v-if="errors.color">{{ errors.color }}</p>
-        </div>
-
         <!-- Upload da Imagem -->
         <div class="field" :class="{ 'is-danger': errors.image }">
           <label class="label">Imagem de Perfil</label>
@@ -79,9 +70,9 @@
               </button>
             </div>
             <button @click="submitForm" class="button btn-success">
-                <span class="btn-icon">✓</span>
-                Enviar
-              </button>
+              <span class="btn-icon">✓</span>
+              Enviar
+            </button>
 
           </div>
         </div>
@@ -109,7 +100,6 @@ export default {
       formData: {
         brideAndGroomName: '',
         weddingDate: '',
-        color: '#ffffff',
         userId: localStorage.getItem('userId'),
         mediaType: '',
         imageFile: null,
@@ -178,10 +168,11 @@ export default {
           this.cropper.destroy();
         }
         this.cropper = new Cropper(image, {
-          aspectRatio: 1,
+          aspectRatio: 16 / 9, // Proporção retangular (16:9)
           viewMode: 2,
           autoCropArea: 0.8,
         });
+
       });
     },
     applyCrop() {
@@ -209,9 +200,7 @@ export default {
       if (!this.formData.weddingDate) {
         this.errors.weddingDate = 'A data do casamento é obrigatória.';
       }
-      if (!this.formData.color) {
-        this.errors.color = 'A cor do tema é obrigatória.';
-      }
+     
       if (!this.imagePreview) {
         this.errors.image = 'A imagem de perfil é obrigatória.';
       }
@@ -244,7 +233,6 @@ export default {
       const formData = new FormData();
       formData.append('brideAndGroomName', this.formData.brideAndGroomName);
       formData.append('weddingDate', this.formData.weddingDate);
-      formData.append('color', this.formData.color);
       formData.append('userId', this.formData.userId);
       formData.append('mediaType', this.formData.mediaType);
 

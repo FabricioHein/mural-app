@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -85,6 +86,12 @@ public class PostController {
     public ResponseEntity<Post> savePostWithJson(@RequestBody PostRequest postRequest) {
         Post savedPost = postService.savePost(postRequest);
         return ResponseEntity.ok(savedPost);
+    }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Map<String, Object>> deletePost(@PathVariable Long postId) {
+        Map<String, Object> response = postService.deletPost(postId);
+        return ResponseEntity.status((Boolean) response.get("success") ? 200 : 500).body(response);
     }
 
 
