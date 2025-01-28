@@ -1,0 +1,4 @@
+*.java linguagens=java
+*.xml linguagens=xml
+*.properties linguagens=properties
+*.html linguagens=html
